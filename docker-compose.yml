@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+    postgres:
+        image: postgres:15
+        ports:
+            - "5432:5432"
+        restart: always
+        environment:
+            - POSTGRES_DB=tidal_artists
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        networks:
+            - network
+networks:
+    network:
+        driver: bridge
