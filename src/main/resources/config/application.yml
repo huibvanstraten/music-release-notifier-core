@@ -27,3 +27,7 @@ spring:
 tidal:
   client-id: # env vars
   client-secret: # env vars
+
+spotify:
+  client-id: # env vars
+  client-secret: # env vars
