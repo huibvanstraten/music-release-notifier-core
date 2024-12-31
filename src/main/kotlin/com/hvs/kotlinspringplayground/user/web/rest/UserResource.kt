@@ -4,6 +4,7 @@ import com.hvs.kotlinspringplayground.artist.web.rest.ArtistResource.Companion.l
 import com.hvs.kotlinspringplayground.user.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -24,6 +25,19 @@ class UserResource(
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             logger.error(e) { "Failed to store artists" }
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
+
+    @GetMapping("user")
+    fun getArtistsForUser(
+        @RequestParam username: String,
+    ): ResponseEntity<Void> {
+        return try {
+            userService.getArtistsForUser(username)
+            ResponseEntity.ok().build()
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to get artists for user $username" }
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
         }
     }

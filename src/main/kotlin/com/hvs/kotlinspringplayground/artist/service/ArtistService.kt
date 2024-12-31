@@ -8,6 +8,7 @@ import com.hvs.kotlinspringplayground.tidal.client.response.ArtistResponseData.A
 import com.hvs.kotlinspringplayground.tidal.domain.Album
 import com.hvs.kotlinspringplayground.tidal.service.TidalService
 import com.hvs.kotlinspringplayground.user.UserService
+import org.springframework.http.ResponseEntity
 
 class ArtistService(
     private val tidalService: TidalService,

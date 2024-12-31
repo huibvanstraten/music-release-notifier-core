@@ -1,5 +1,6 @@
 package com.hvs.kotlinspringplayground.user
 
+import com.hvs.kotlinspringplayground.artist.domain.jpa.Artist
 import com.hvs.kotlinspringplayground.tidal.client.response.ArtistResponseData
 import com.hvs.kotlinspringplayground.user.dto.UserDataDto
 import com.hvs.kotlinspringplayground.user.domain.jpa.User
@@ -30,5 +31,13 @@ class UserService(
         )
 
         userRepository.save(User.from(userDto))
+    }
+
+    fun getArtistsForUser(
+        userName: String,
+    ): List<Artist> {
+        val user = requireNotNull(userRepository.findByUsername(userName))
+
+
     }
 }
