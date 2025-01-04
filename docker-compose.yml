@@ -2,6 +2,7 @@ version: '3.8'
 services:
     postgres:
         image: postgres:15
+        container_name: database
         ports:
             - "5432:5432"
         restart: always
@@ -11,6 +12,12 @@ services:
             - POSTGRES_PASSWORD=postgres
         networks:
             - network
+    rabbitmq:
+        image: rabbitmq:4.0.5-management-alpine
+        container_name: rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
 networks:
     network:
         driver: bridge

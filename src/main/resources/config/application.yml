@@ -2,6 +2,12 @@ spring:
   application:
     name: kotlin-spring-playground
 
+  rabbitmq:
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+
   datasource:
     url: jdbc:postgresql://localhost:5432/tidal_artists
     driver-class-name: org.postgresql.Driver
@@ -27,3 +33,15 @@ spring:
 tidal:
   client-id: # env vars
   client-secret: # env vars
+
+outbox:
+  publisher:
+    cloudevent-source: "com.hvs.kotlinspringplayground"
+    polling-rate: PT10S
+  database: postgres
+
+rabbitmq:
+  exchange: "music_monitor"
+  queue: "release"
+  routing-key: "release_routing_key"
+  delivery-timeout: 1

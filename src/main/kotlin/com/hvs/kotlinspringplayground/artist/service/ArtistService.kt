@@ -1,18 +1,23 @@
 package com.hvs.kotlinspringplayground.artist.service
 
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.hvs.kotlinspringplayground.artist.domain.jpa.Artist
 import com.hvs.kotlinspringplayground.artist.dto.ArtistDataDto
+import com.hvs.kotlinspringplayground.artist.event.ReleaseEvent
 import com.hvs.kotlinspringplayground.artist.repository.ArtistRepository
+import com.hvs.kotlinspringplayground.outbox.service.OutboxService
 import com.hvs.kotlinspringplayground.tidal.client.response.ArtistResponseData.ArtistData
 import com.hvs.kotlinspringplayground.tidal.domain.Album
 import com.hvs.kotlinspringplayground.tidal.service.TidalService
 import com.hvs.kotlinspringplayground.user.UserService
+import java.util.UUID
 
 class ArtistService(
     private val tidalService: TidalService,
     private val artistRepository: ArtistRepository,
     private val userService: UserService,
+    private val outboxService: OutboxService,
 ) {
 
     // get all artists and save into table: name and id
@@ -71,7 +76,6 @@ class ArtistService(
         userService.storeArtistsForUser(userName, userArtistList)
     }
 
-
     fun getNewAlbumForArtist(artistId: Int): Album? {
 
         val artist = tidalService.getArtist(artistId = artistId).data.first()
@@ -80,6 +84,13 @@ class ArtistService(
 
         val albums = artistAlbumIds.data.mapNotNull { albumId ->
             tidalService.getAlbum(albumId.id)
+        }
+
+        outboxService.send {
+            ReleaseEvent(
+                id = UUID.randomUUID().toString(),
+                release = jacksonObjectMapper().createObjectNode(),
+            )
         }
 
         return albums.maxByOrNull { it.releaseDate }
