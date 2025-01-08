@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.web.client.RestClient
 import org.springframework.http.HttpHeaders
 
-
 class SpotifyClient(
     private val spotifyAuthorisationService: SpotifyAuthorisationService,
 ) {
@@ -27,11 +26,13 @@ class SpotifyClient(
         return response?: throw RuntimeException("Failed to retrieve artist data for artist: $artistId")
     }
 
-    fun findArtistByName(artistName: String, accessToken: String): SpotifyArtistSearchResponse {
+    fun findArtistByName(
+        artistName: String
+    ): SpotifyArtistSearchResponse {
         val response = restClient
             .get()
             .uri("$SPOTIFY_BASE_URL/search?q=$artistName&type=artist")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${accessToken()}")
             .retrieve()
             .body(SpotifyArtistSearchResponse::class.java)
 
@@ -53,7 +54,7 @@ class SpotifyClient(
         val response = restClient
             .get()
             .uri(url)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer ${accessToken()}()")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${accessToken()}")
             .retrieve()
             .body(SpotifyAlbumsResponse::class.java)
 
@@ -68,6 +69,5 @@ class SpotifyClient(
 
     }
 
-    //TODO see if you can do with functional programming
     private fun accessToken() = spotifyAuthorisationService.getAccessToken()
 }

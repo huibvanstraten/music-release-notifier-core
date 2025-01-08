@@ -10,20 +10,17 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/spotify")
+@RequestMapping("/api/v1/spotify")
 class SpotifyResource(
     private val spotifyService: SpotifyService
 ) {
 
-    @GetMapping("/artists/{artistId}/albums")
+    @GetMapping("/artist/{artistId}/albums")
     fun getArtistAlbums(
         @PathVariable artistId: String,
         pageable: Pageable
     ): Page<SpotifyAlbumsResponse.AlbumItem> {
-        // Extract token from the header if needed ("Bearer XXX"), or pass directly.
-        // Assuming the header is "Bearer <token>", you can parse it accordingly.
-
-        return spotifyService.getAlbumsArtist(
+        return spotifyService.getAlbumsOfArtist(
             artistId = artistId,
             pageable = pageable
         )

@@ -32,7 +32,7 @@ data class User(
             User(
                 id = this.id,
                 username = this.name,
-                artists = jacksonObjectMapper().convertValue(this.artists),
+                artists = jacksonObjectMapper().convertValue(this.artistIdList),
             )
         }
     }

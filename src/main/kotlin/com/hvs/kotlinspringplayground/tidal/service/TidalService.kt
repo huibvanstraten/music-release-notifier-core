@@ -3,7 +3,6 @@ package com.hvs.kotlinspringplayground.tidal.service
 import com.hvs.kotlinspringplayground.tidal.client.TidalClient
 import com.hvs.kotlinspringplayground.tidal.domain.Album
 
-
 class TidalService(
     private val tidalClient: TidalClient
 ) {
@@ -19,5 +18,4 @@ class TidalService(
 
         return Album.from(albumData.data.first())
     }
-
 }
