@@ -6,7 +6,6 @@ import com.hvs.kotlinspringplayground.user.domain.jpa.User
 import com.hvs.kotlinspringplayground.user.dto.UserDataDto
 import com.hvs.kotlinspringplayground.user.repository.UserRepository
 import com.hvs.kotlinspringplayground.user.service.UserService
-import org.springframework.transaction.annotation.Transactional
 
 class UserService(
     private val userRepository: UserRepository,
