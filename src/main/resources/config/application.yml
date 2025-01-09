@@ -30,7 +30,14 @@ spring:
     change-log: classpath:config/liquibase/changelog-master.xml
     enabled: true
 
+cors:
+  allowed-origins: http://localhost:4201
+
 tidal:
+  client-id: # env vars
+  client-secret: # env vars
+
+spotify:
   client-id: # env vars
   client-secret: # env vars
 

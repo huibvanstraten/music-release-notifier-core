@@ -10,4 +10,3 @@ data class AlbumIdListResponseData(
         val id: String,
     )
 }
-
