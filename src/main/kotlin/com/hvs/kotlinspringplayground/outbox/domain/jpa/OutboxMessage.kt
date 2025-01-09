@@ -12,12 +12,12 @@ import java.util.UUID
 class OutboxMessage(
 
     @Id
-    @Column(name = "id")
+    @Column(name = "id", nullable = false, updatable = false)
     val id: UUID = UUID.randomUUID(),
 
-    @Column(name = "message")
+    @Column(name = "message", nullable = false)
     val message: String,
 
-    @Column(name = "created_on")
+    @Column(name = "created_on", nullable = false)
     val createdOn: LocalDateTime = LocalDateTime.now()
 )

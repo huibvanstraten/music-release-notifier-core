@@ -18,11 +18,12 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.transaction.PlatformTransactionManager
 import java.util.UUID
 
-
 @Configuration
+@EnableScheduling
 @EnableJpaRepositories(basePackageClasses = [OutboxRepository::class])
 @EntityScan("com.hvs.kotlinspringplayground.outbox.domain.jpa")
 @AutoConfigureAfter(DataSourceAutoConfiguration::class, HibernateJpaAutoConfiguration::class)

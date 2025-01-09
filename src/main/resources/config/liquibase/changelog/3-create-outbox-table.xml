@@ -9,7 +9,7 @@
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="outboxPK"/>
             </column>
-            <column name="message" type="MEDIUMTEXT">
+            <column name="message" type="longtext">
                 <constraints nullable="false"/>
             </column>
             <column name="created_on" type="DATETIME">

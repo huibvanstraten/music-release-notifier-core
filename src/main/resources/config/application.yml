@@ -9,7 +9,7 @@ spring:
       mandatory: true
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/tidal_artists
+    url: jdbc:postgresql://localhost:5432/music-release-notifier
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: postgres
@@ -20,8 +20,9 @@ spring:
       idle-timeout: 30000
       max-lifetime: 1800000
       connection-timeout: 30000
+      validation-timeout: 5000 # 5 seconds
+      connection-test-query: SELECT 1
       pool-name: HikariPool-1
-
   jpa:
     hibernate:
       ddl-auto: update

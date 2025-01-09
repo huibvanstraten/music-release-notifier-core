@@ -25,7 +25,7 @@ open class CamundaOutboxService(
     private val cloudEventSource: String
 ) : OutboxService {
 
-    @Transactional(propagation = Propagation.MANDATORY) // Check later if there is a Transactional above, otherwise change propagation
+    @Transactional(propagation = Propagation.MANDATORY)
     override fun send(eventSupplier: Supplier<BaseEvent>) {
         val baseEvent = eventSupplier.get()
         val eventData = EventData(baseEvent.result)

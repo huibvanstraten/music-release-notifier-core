@@ -7,7 +7,7 @@ services:
             - "5432:5432"
         restart: always
         environment:
-            - POSTGRES_DB=tidal_artists
+            - POSTGRES_DB=music-release-notifier
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
         networks:
