@@ -1,6 +1,6 @@
 package com.hvs.kotlinspringplayground.user.autoconfigure
 
-import com.hvs.kotlinspringplayground.user.UserService
+import com.hvs.kotlinspringplayground.user.service.impl.UserService
 import com.hvs.kotlinspringplayground.user.repository.UserRepository
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.context.annotation.Bean

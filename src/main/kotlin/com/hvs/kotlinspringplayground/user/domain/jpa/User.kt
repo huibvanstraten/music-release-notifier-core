@@ -12,7 +12,6 @@ import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.util.UUID
 
-
 @Entity
 @Table(name = "users")
 data class User(
@@ -32,7 +31,7 @@ data class User(
             User(
                 id = this.id,
                 username = this.name,
-                artists = jacksonObjectMapper().convertValue(this.artists),
+                artists = jacksonObjectMapper().convertValue(this.artistIdList),
             )
         }
     }

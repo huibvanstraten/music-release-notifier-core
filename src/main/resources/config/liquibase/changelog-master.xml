@@ -6,5 +6,6 @@
 
     <include file="changelog/1-create-artists-table.xml" relativeToChangelogFile="true"/>
     <include file="changelog/2-create-users-table.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/3-create-outbox-table.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

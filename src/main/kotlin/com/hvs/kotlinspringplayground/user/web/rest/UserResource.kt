@@ -1,7 +1,7 @@
 package com.hvs.kotlinspringplayground.user.web.rest
 
 import com.hvs.kotlinspringplayground.artist.web.rest.ArtistResource.Companion.logger
-import com.hvs.kotlinspringplayground.user.UserService
+import com.hvs.kotlinspringplayground.user.service.impl.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
