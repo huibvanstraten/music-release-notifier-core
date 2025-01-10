@@ -1,6 +1,6 @@
 spring:
   application:
-    name: kotlin-spring-playground
+    name: music-release-notifier-core
 
   rabbitmq:
     publisher-confirm-type: correlated
