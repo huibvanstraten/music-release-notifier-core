@@ -9,6 +9,8 @@ interface ArtistService {
 
     fun storeArtists()
 
+    fun getArtistsForUser(username: String): List<String>?
+
     fun storeSpotifyArtistsForUser(
         username: String,
         artistIdList: List<String>

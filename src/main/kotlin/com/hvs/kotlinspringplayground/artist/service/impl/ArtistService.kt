@@ -71,6 +71,10 @@ open class ArtistService(
         }
     }
 
+    override fun getArtistsForUser(username: String): List<String>? {
+         return userService.getArtistsForUser(username)
+    }
+
     override fun storeSpotifyArtistsForUser(
         username: String,
         artistIdList: List<String>

@@ -58,6 +58,19 @@ class ArtistResource(
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "An unexpected error occurred"))        }
     }
 
+    @GetMapping("user")
+    fun getArtistsForUser(
+        @RequestParam username: String,
+    ): ResponseEntity<List<String>?> {
+        return try {
+            artistService.getArtistsForUser(username)
+            ResponseEntity.ok().build()
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to get artists for user $username" }
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
+
     @PostMapping("user")
     fun saveArtistsForUser(
         @RequestParam username: String,
