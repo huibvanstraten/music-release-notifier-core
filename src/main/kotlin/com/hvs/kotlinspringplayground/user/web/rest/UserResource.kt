@@ -64,4 +64,31 @@ class UserResource(
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
         }
     }
+
+    @GetMapping("list")
+    fun getArtistIdListForUser(
+        @RequestParam username: String,
+    ): ResponseEntity<List<String>?> {
+        return try {
+            userService.getArtistIdListForUser(username)
+            ResponseEntity.ok().build()
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to get artists for user $username" }
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
+
+    @PostMapping("list")
+    fun saveArtistsForUser(
+        @RequestParam username: String,
+        @RequestParam artistIdList: List<String>,
+    ): ResponseEntity<Void> {
+        return try {
+            userService.storeArtistListForUser(username,artistIdList)
+            ResponseEntity.ok().build()
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to store artists for user $username" }
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
 }

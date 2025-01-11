@@ -8,7 +8,7 @@ data class SpotifyArtistResponse(
 
     val followers: Followers,
     val genres: List<String>,
-    val href: String,
+    val href: String?,
     val id: String,
     val images: List<Image>,
     val name: String,
@@ -21,14 +21,14 @@ data class SpotifyArtistResponse(
     )
 
     data class Followers(
-        val href: String,
+        val href: String?,
         val total: Int
     )
 
     data class Image(
-        val height: Int,
-        val url: String,
-        val width: Int
+        val height: Int?,
+        val url: String?,
+        val width: Int?
     )
 }
 

@@ -12,7 +12,7 @@ interface UserService {
 
     fun createUser(userName: String)
 
-    fun getArtistsForUser(username: String): List<String>?
+    fun getArtistIdListForUser(username: String): List<String>?
 
-    fun storeArtistsForUser(userName: String, artists: List<String>)
+    fun storeArtistListForUser(userName: String, artists: List<String>)
 }

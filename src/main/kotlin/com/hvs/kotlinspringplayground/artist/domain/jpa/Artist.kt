@@ -23,7 +23,7 @@ data class Artist(
         fun from(artistData: ArtistDataDto): Artist = with(artistData) {
             Artist(
                 id = this.id,
-                artistId = this.streamingId.toString(),
+                artistId = this.artistId.toString(),
                 name = this.name,
             )
         }

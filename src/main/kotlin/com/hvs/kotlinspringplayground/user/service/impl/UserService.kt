@@ -24,19 +24,19 @@ class UserService(
 
     override fun getTotalUsers(): Long = userRepository.findAll().size.toLong()
 
-    override fun getArtistsForUser(
+    override fun getArtistIdListForUser(
         username: String,
     ): List<String>? {
-        val (_, currentArtists: List<String>) = getUserWithArtists(username)
+        val (_, currentArtists: List<String>) = getUserWithArtistIdList(username)
         return currentArtists
     }
 
-    override fun storeArtistsForUser(
+    override fun storeArtistListForUser(
         username: String,
         artists: List<String>
     ) {
 
-        val (user, currentArtists: List<String>) = getUserWithArtists(username)
+        val (user, currentArtists: List<String>) = getUserWithArtistIdList(username)
 
         val userDto = UserDataDto(
             id = user.id,
@@ -47,7 +47,7 @@ class UserService(
         userRepository.save(User.Companion.from(userDto))
     }
 
-    private fun getUserWithArtists(username: String): Pair<User, List<String>> {
+    private fun getUserWithArtistIdList(username: String): Pair<User, List<String>> {
         val user = requireNotNull(userRepository.findByUsername(username))
 
         val objectMapper = ObjectMapper()

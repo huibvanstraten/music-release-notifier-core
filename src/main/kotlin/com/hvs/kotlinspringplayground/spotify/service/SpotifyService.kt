@@ -10,17 +10,25 @@ class SpotifyService(
     private val spotifyClient: SpotifyClient
 ) {
 
-    // TODO: handle several returns
+    fun getArtist(
+        artistId: String,
+    ): ArtistDataDto = spotifyClient.getArtist(artistId).run {
+        ArtistDataDto(
+            name = name,
+            artistId = artistId,
+        )
+    }
+
     fun getArtistByName(
         artistName: String
     ): ArtistDataDto? {
         val searchResult = spotifyClient.findArtistByName(artistName)
         if (searchResult.artists == null || searchResult.artists.items == null) return null
 
-        with(searchResult.artists.items.first()) {
-            return ArtistDataDto(
-                name = this.name,
-                streamingId = this.id
+        return searchResult.artists.items.firstOrNull { it.name.equals(artistName, ignoreCase = true) }?.let {
+            ArtistDataDto(
+                name = it.name,
+                artistId = it.id
             )
         }
     }
