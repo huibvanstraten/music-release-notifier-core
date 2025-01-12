@@ -8,5 +8,4 @@ import org.springframework.stereotype.Repository
 interface ArtistRepository : JpaRepository<Artist, Long> {
 
     fun findByNameIgnoreCase(names: String): List<Artist>
-
 }
