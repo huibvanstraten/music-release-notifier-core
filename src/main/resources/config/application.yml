@@ -1,9 +1,15 @@
 spring:
   application:
-    name: kotlin-spring-playground
+    name: music-release-notifier-core
+
+  rabbitmq:
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/tidal_artists
+    url: jdbc:postgresql://localhost:5432/music-release-notifier
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: postgres
@@ -14,8 +20,9 @@ spring:
       idle-timeout: 30000
       max-lifetime: 1800000
       connection-timeout: 30000
+      validation-timeout: 5000 # 5 seconds
+      connection-test-query: SELECT 1
       pool-name: HikariPool-1
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -34,3 +41,15 @@ tidal:
 spotify:
   client-id: # env vars
   client-secret: # env vars
+
+outbox:
+  publisher:
+    cloudevent-source: "com.hvs.kotlinspringplayground"
+    polling-rate: PT10S
+  database: postgres
+
+rabbitmq:
+  exchange: "music_monitor"
+  queue: "release"
+  routing-key: "release_routing_key"
+  delivery-timeout: 1
