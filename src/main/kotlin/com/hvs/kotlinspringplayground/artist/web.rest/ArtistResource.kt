@@ -73,7 +73,6 @@ class ArtistResource(
         }
     }
 
-
     companion object {
         val logger = KotlinLogging.logger {}
     }
