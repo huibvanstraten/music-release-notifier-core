@@ -19,7 +19,7 @@ class UserService(
         val userDataDto = UserDataDto(
             username = userName,
         )
-        userRepository.save(User.Companion.from(userDataDto))
+        userRepository.save(User.from(userDataDto))
     }
 
     override fun getTotalUsers(): Long = userRepository.findAll().size.toLong()
@@ -27,7 +27,7 @@ class UserService(
     override fun getArtistIdListForUser(
         username: String,
     ): List<String>? {
-        val (_, currentArtists: List<String>) = getUserWithArtistIdList(username)
+        val (_, currentArtists: List<String>?) = getUserWithArtistIdList(username)
         return currentArtists
     }
 
@@ -36,24 +36,24 @@ class UserService(
         artists: List<String>
     ) {
 
-        val (user, currentArtists: List<String>) = getUserWithArtistIdList(username)
+        val (user, currentArtists: List<String>?) = getUserWithArtistIdList(username)
 
         val userDto = UserDataDto(
             id = user.id,
             username = user.username,
-            artistIdList = (currentArtists + artists).distinct()
+            artistIdList = ((currentArtists ?: emptyList()) + artists).distinct()
         )
 
-        userRepository.save(User.Companion.from(userDto))
+        userRepository.save(User.from(userDto))
     }
 
-    private fun getUserWithArtistIdList(username: String): Pair<User, List<String>> {
+    private fun getUserWithArtistIdList(username: String): Pair<User, List<String>?> {
         val user = requireNotNull(userRepository.findByUsername(username))
 
         val objectMapper = ObjectMapper()
-        val currentArtists: List<String> = user.artistIdList?.let {
+        val currentArtists = user.artistIdList?.let {
             objectMapper.convertValue(it, object : TypeReference<MutableList<String>>() {})
-        } ?: emptyList()
+        }
         return Pair(user, currentArtists)
     }
 }

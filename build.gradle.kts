@@ -95,6 +95,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito:mockito-core:5.14.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.14")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

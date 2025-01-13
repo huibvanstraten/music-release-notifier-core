@@ -70,8 +70,8 @@ class UserResource(
         @RequestParam username: String,
     ): ResponseEntity<List<String>?> {
         return try {
-            userService.getArtistIdListForUser(username)
-            ResponseEntity.ok().build()
+            val artistIdList = userService.getArtistIdListForUser(username)
+            ResponseEntity.ok().body(artistIdList)
         } catch (e: Exception) {
             logger.error(e) { "Failed to get artists for user $username" }
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()

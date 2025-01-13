@@ -7,9 +7,9 @@ import org.springframework.web.client.RestClient
 
 class SpotifyAuthorisationService(
     private val spotifyCredentials: SpotifyCredentials,
-    ) {
-
-        private val restClient: RestClient = RestClient.create()
+    private val restClient: RestClient = RestClient.create(),
+    private val authorisationUrl: String = "https://accounts.spotify.com/api/token"
+) {
 
         fun getAccessToken(): String {
             val formData: MultiValueMap<String, String> = LinkedMultiValueMap<String, String>().apply {
@@ -20,16 +20,12 @@ class SpotifyAuthorisationService(
 
             val response = restClient
                 .post()
-                .uri(SPOTIFY_AUTH_URL)
+                .uri(authorisationUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(formData) // Form data body
+                .body(formData)
                 .retrieve()
                 .body(SpotifyAuthorisationToken::class.java)
 
-            return response?.accessToken ?: throw RuntimeException("Failed to retrieve access token")
-        }
-
-    companion object {
-        private const val SPOTIFY_AUTH_URL = "https://accounts.spotify.com/api/token"
-    }
+            return response!!.accessToken
+            }
 }

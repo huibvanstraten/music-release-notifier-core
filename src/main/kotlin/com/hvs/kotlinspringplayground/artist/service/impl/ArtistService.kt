@@ -11,7 +11,6 @@ import com.hvs.kotlinspringplayground.outbox.service.OutboxService
 import com.hvs.kotlinspringplayground.spotify.service.SpotifyService
 import com.hvs.kotlinspringplayground.tidal.domain.Album
 import com.hvs.kotlinspringplayground.tidal.service.TidalService
-import com.hvs.kotlinspringplayground.user.service.UserService
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
@@ -19,7 +18,6 @@ open class ArtistService(
     private val tidalService: TidalService,
     private val spotifyService: SpotifyService,
     private val artistRepository: ArtistRepository,
-    private val userService: UserService,
     private val outboxService: OutboxService,
 ): ArtistService {
 

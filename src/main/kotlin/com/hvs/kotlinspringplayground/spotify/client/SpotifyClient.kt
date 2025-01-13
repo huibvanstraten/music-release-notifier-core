@@ -12,13 +12,14 @@ import org.springframework.http.HttpHeaders
 
 class SpotifyClient(
     private val spotifyAuthorisationService: SpotifyAuthorisationService,
+    private val restClient: RestClient = RestClient.create(),
+    private val baseUrl: String = "https://api.spotify.com/v1"
 ) {
-    private val restClient = RestClient.create()
 
     fun getArtist(artistId: String): SpotifyArtistResponse {
         val response = restClient
             .get()
-            .uri("$SPOTIFY_BASE_URL/artists/$artistId")
+            .uri("${baseUrl}/artists/$artistId")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${accessToken()}")
             .retrieve()
             .body(SpotifyArtistResponse::class.java)
@@ -31,7 +32,7 @@ class SpotifyClient(
     ): SpotifyArtistSearchResponse {
         val response = restClient
             .get()
-            .uri("$SPOTIFY_BASE_URL/search?q=$artistName&type=artist")
+            .uri("${baseUrl}/search?q=$artistName&type=artist")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${accessToken()}")
             .retrieve()
             .body(SpotifyArtistSearchResponse::class.java)
@@ -42,13 +43,13 @@ class SpotifyClient(
     fun getArtistAlbumsPageable(
         artistId: String,
         pageable: Pageable,
-        includeGroups: String = "album,single,appears_on"
+        includeGroups: String? = "album,single,appears_on"
     ): Page<SpotifyAlbumsResponse.AlbumItem> {
 
         val limit = pageable.pageSize
         val offset = pageable.offset
 
-        val url = "$SPOTIFY_BASE_URL/artists/$artistId/albums" +
+        val url = "${baseUrl}/artists/$artistId/albums" +
             "?include_groups=$includeGroups&limit=$limit&offset=$offset"
 
         val response = restClient
@@ -64,10 +65,6 @@ class SpotifyClient(
         return PageImpl(items, pageable, total)
     }
 
-    companion object {
-        private const val SPOTIFY_BASE_URL = "https://api.spotify.com/v1"
-
-    }
 
     private fun accessToken() = spotifyAuthorisationService.getAccessToken()
 }
