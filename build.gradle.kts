@@ -22,6 +22,7 @@ plugins {
     kotlin("plugin.spring") version "2.1.0"
     id("org.springframework.boot") version "3.4.0"
     id("io.spring.dependency-management") version "1.1.6"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
     kotlin("plugin.jpa") version "2.1.0"
 
     // Docker-compose plugin
@@ -71,6 +72,11 @@ dependencies {
 
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.1")
+
+
 
     // Kotlin logger
     implementation("io.github.microutils:kotlin-logging:3.0.5")
@@ -95,6 +101,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito:mockito-core:5.14.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.14")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -5,14 +5,11 @@ import com.hvs.kotlinspringplayground.tidal.domain.Album
 
 interface ArtistService {
 
-    fun getArtistsFromSpotifyByName(artistName: String): ArtistDataDto?
+    fun getArtist(artistId: String): ArtistDataDto
+
+    fun getArtistFromSpotifyByName(artistName: String): ArtistDataDto?
 
     fun storeArtists()
-
-    fun storeSpotifyArtistsForUser(
-        username: String,
-        artistIdList: List<String>
-    )
 
     fun getNewAlbumForArtist(artistId: Int): Album?
 }

@@ -6,7 +6,6 @@ import com.hvs.kotlinspringplayground.spotify.service.SpotifyService
 import com.hvs.kotlinspringplayground.outbox.autoconfigure.OutboxAutoConfiguration
 import com.hvs.kotlinspringplayground.outbox.service.OutboxService
 import com.hvs.kotlinspringplayground.tidal.service.TidalService
-import com.hvs.kotlinspringplayground.user.service.impl.UserService
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -23,13 +22,11 @@ class ArtistAutoConfiguration {
     @Bean
     fun artistService(
         tidalService: TidalService,
-        userService: UserService,
         artistRepository: ArtistRepository,
         spotifyService: SpotifyService,
         outboxService: OutboxService,
     ) = ArtistService(
         tidalService = tidalService,
-        userService = userService,
         artistRepository = artistRepository,
         spotifyService = spotifyService,
         outboxService = outboxService,

@@ -12,7 +12,7 @@
             <column name="username" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="artists" type="JSONB">
+            <column name="artist_id_list" type="JSONB">
                 <constraints nullable="true"/>
             </column>
         </createTable>

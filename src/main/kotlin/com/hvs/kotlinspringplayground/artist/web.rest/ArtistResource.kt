@@ -19,16 +19,29 @@ class ArtistResource(
 ) {
 
     @GetMapping
+    fun getArtist(
+        @RequestParam artistId: String
+    ): ResponseEntity<ArtistDataDto> {
+        return try {
+            val response = artistService.getArtist(artistId)
+            ResponseEntity.ok(response)
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to fetch artist" }
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
+
+    @GetMapping("/name")
     fun getArtistsByName(
         @RequestParam artistName: String,
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<ArtistDataDto> {
         return try {
-            when (val response = artistService.getArtistsFromSpotifyByName(artistName)) {
+            when (val response = artistService.getArtistFromSpotifyByName(artistName)) {
                 is ArtistDataDto -> ResponseEntity.ok(response)
-                else -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("No artist corresponding artistname $artistName")
+                else -> ResponseEntity.status(HttpStatus.NOT_FOUND).build()
             }
         } catch (e: Exception) {
-            logger.error(e) { "Failed to store artists" }
+            logger.error(e) { "Failed to fetch artist" }
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
         }
     }
@@ -55,20 +68,8 @@ class ArtistResource(
             }
         } catch (e: Exception) {
             logger.error(e) { "Failed to get album for $artistId" }
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "An unexpected error occurred"))        }
-    }
-
-    @PostMapping("user")
-    fun saveArtistsForUser(
-        @RequestParam username: String,
-        @RequestParam artistIdList: List<String>,
-    ): ResponseEntity<Void> {
-        return try {
-            artistService.storeSpotifyArtistsForUser(username,artistIdList)
-            ResponseEntity.ok().build()
-        } catch (e: Exception) {
-            logger.error(e) { "Failed to store artists for user $username" }
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "An unexpected error occurred"))
         }
     }
 

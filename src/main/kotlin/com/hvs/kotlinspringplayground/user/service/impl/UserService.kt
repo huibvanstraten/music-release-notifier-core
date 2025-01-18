@@ -6,37 +6,54 @@ import com.hvs.kotlinspringplayground.user.domain.jpa.User
 import com.hvs.kotlinspringplayground.user.dto.UserDataDto
 import com.hvs.kotlinspringplayground.user.repository.UserRepository
 import com.hvs.kotlinspringplayground.user.service.UserService
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 
 class UserService(
     private val userRepository: UserRepository,
 ): UserService {
 
-    fun createUser(userName: String) {
+    override fun getUsers(pageable: Pageable): Page<User> = userRepository.findAll(pageable)
+
+    override fun createUser(userName: String) {
         val userDataDto = UserDataDto(
-            name = userName,
+            username = userName,
         )
-        userRepository.save(User.Companion.from(userDataDto))
+        userRepository.save(User.from(userDataDto))
     }
 
-    override fun storeArtistsForUser(
-        userName: String,
+    override fun getTotalUsers(): Long = userRepository.findAll().size.toLong()
+
+    override fun getArtistIdListForUser(
+        username: String,
+    ): List<String>? {
+        val (_, currentArtists: List<String>?) = getUserWithArtistIdList(username)
+        return currentArtists
+    }
+
+    override fun storeArtistListForUser(
+        username: String,
         artists: List<String>
     ) {
 
-        val user = requireNotNull(userRepository.findByUsername(userName))
-
-        val objectMapper = ObjectMapper()
-        val currentArtists: List<String> = user.artists?.let {
-            objectMapper.convertValue(it, object : TypeReference<MutableList<String>>() {})
-        } ?: emptyList()
-
+        val (user, currentArtists: List<String>?) = getUserWithArtistIdList(username)
 
         val userDto = UserDataDto(
             id = user.id,
-            name = user.username,
-            artistIdList = (currentArtists + artists).distinct()
+            username = user.username,
+            artistIdList = ((currentArtists ?: emptyList()) + artists).distinct()
         )
 
-        userRepository.save(User.Companion.from(userDto))
+        userRepository.save(User.from(userDto))
+    }
+
+    private fun getUserWithArtistIdList(username: String): Pair<User, List<String>?> {
+        val user = requireNotNull(userRepository.findByUsername(username))
+
+        val objectMapper = ObjectMapper()
+        val currentArtists = user.artistIdList?.let {
+            objectMapper.convertValue(it, object : TypeReference<MutableList<String>>() {})
+        }
+        return Pair(user, currentArtists)
     }
 }

@@ -11,7 +11,6 @@ import com.hvs.kotlinspringplayground.outbox.service.OutboxService
 import com.hvs.kotlinspringplayground.spotify.service.SpotifyService
 import com.hvs.kotlinspringplayground.tidal.domain.Album
 import com.hvs.kotlinspringplayground.tidal.service.TidalService
-import com.hvs.kotlinspringplayground.user.service.UserService
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
@@ -19,27 +18,19 @@ open class ArtistService(
     private val tidalService: TidalService,
     private val spotifyService: SpotifyService,
     private val artistRepository: ArtistRepository,
-    private val userService: UserService,
     private val outboxService: OutboxService,
 ): ArtistService {
 
     // TODO: Pattern to use either tidal or spotify, without it being this services concern
     // TODO: GettingArtistsByName with autocomplete
-    /** Resource Rest with parameter based filtering
-     *              @GetMapping("/user")
-     * public MappingJacksonValue getUser(@RequestParam List<String> fields) {
-     *     User user = // get user data
-     *     SimpleFilterProvider filterProvider = new SimpleFilterProvider();
-     *     filterProvider.addFilter("userFilter", SimpleBeanPropertyFilter.filterOutAllExcept(new HashSet<>(fields)));
-     *
-     *     MappingJacksonValue mapping = new MappingJacksonValue(user);
-     *     mapping.setFilters(filterProvider);
-     *     return mapping;
-     * }
-     */
+
+    override fun getArtist(
+        artistId: String,
+        ): ArtistDataDto = spotifyService.getArtist(artistId)
+
 
     @Transactional
-    override fun getArtistsFromSpotifyByName(
+    override fun getArtistFromSpotifyByName(
         artistName: String
     ): ArtistDataDto? = spotifyService.getArtistByName(artistName).also { artistDataDto ->
         outboxService.send {
@@ -54,7 +45,7 @@ open class ArtistService(
         val artistDataResponse = tidalService.getAllArtists()
         val artists = artistDataResponse.data.map { artist ->
             ArtistDataDto(
-                streamingId = artist.id,
+                artistId = artist.id,
                 name = artist.attributes.name,
             )
         }
@@ -70,11 +61,6 @@ open class ArtistService(
             )
         }
     }
-
-    override fun storeSpotifyArtistsForUser(
-        username: String,
-        artistIdList: List<String>
-    ) = userService.storeArtistsForUser(username, artistIdList)
 
     override fun getNewAlbumForArtist(artistId: Int): Album? {
 

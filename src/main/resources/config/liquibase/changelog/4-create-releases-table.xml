@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.30.xsd">
+
+    <changeSet id="1-create-releases-table" author="HvS">
+        <createTable tableName="releases">
+            <column name="release_id" type="VARCHAR(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="artist_id" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_tracks" type="INT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="release_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="spotify_url" type="VARCHAR">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

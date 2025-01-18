@@ -1,6 +1,7 @@
 package com.hvs.kotlinspringplayground.artist.domain.jpa
 
 import com.hvs.kotlinspringplayground.artist.dto.ArtistDataDto
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
@@ -14,6 +15,7 @@ data class Artist(
     @Id
     val id: UUID,
 
+    @Column(name = "artist_id")
     val artistId: String?,
 
     val name: String,
@@ -23,7 +25,7 @@ data class Artist(
         fun from(artistData: ArtistDataDto): Artist = with(artistData) {
             Artist(
                 id = this.id,
-                artistId = this.streamingId.toString(),
+                artistId = this.artistId.toString(),
                 name = this.name,
             )
         }

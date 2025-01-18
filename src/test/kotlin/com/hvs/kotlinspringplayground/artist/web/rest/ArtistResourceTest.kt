@@ -3,17 +3,23 @@ package com.hvs.kotlinspringplayground.artist.web.rest
 import com.hvs.kotlinspringplayground.artist.dto.ArtistDataDto
 import com.hvs.kotlinspringplayground.artist.service.ArtistService
 import com.hvs.kotlinspringplayground.tidal.domain.Album
-import org.junit.jupiter.api.Assertions.*
-import org.mockito.kotlin.whenever
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.whenever
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.http.HttpStatus
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
 class ArtistResourceTest {
@@ -25,55 +31,89 @@ class ArtistResourceTest {
     private lateinit var artistResource: ArtistResource
 
     @Test
+    fun `getArtist returns OK and ArtistDataDto when service succeeds`() {
+        // GIVEN
+        val artistId = "123"
+        val artistData = ArtistDataDto(
+            id = UUID.randomUUID(),
+            artistId = artistId,
+            name = "name",
+        )
+        whenever(artistService.getArtist(artistId)).thenReturn(artistData)
+
+        // WHEN
+        val response = artistResource.getArtist(artistId)
+
+        // THEN
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(artistData, response.body)
+        verify(artistService, times(1)).getArtist(artistId)
+    }
+
+    @Test
+    fun `getArtist returns INTERNAL_SERVER_ERROR when an exception occurs`() {
+        // GIVEN
+        val artistId = "errorCase"
+        whenever(artistService.getArtist(artistId)).thenThrow(RuntimeException("Service error"))
+
+        // WHEN
+        val response = artistResource.getArtist(artistId)
+
+        // THEN
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
+        assertNull(response.body)
+        verify(artistService, times(1)).getArtist(artistId)
+    }
+
+    @Test
     fun `getArtistsByName returns OK and ArtistDataDto when service returns valid data`() {
         // GIVEN
-        val artistName = "SomeBand"
-        val artistDataDto = ArtistDataDto(
+        val artistName = "Beatles"
+        val artistData = ArtistDataDto(
             id = UUID.randomUUID(),
-            streamingId = "someId",
+            artistId = "1234",
             name = artistName,
-
         )
-        whenever(artistService.getArtistsFromSpotifyByName(artistName)).thenReturn(artistDataDto)
+        whenever(artistService.getArtistFromSpotifyByName(artistName)).thenReturn(artistData)
 
         // WHEN
         val response = artistResource.getArtistsByName(artistName)
 
         // THEN
-        assertEquals(HttpStatus.OK, response.statusCode, "Expected HTTP 200")
-        assertTrue(response.body is ArtistDataDto, "Response body should be an ArtistDataDto")
-        verify(artistService, times(1)).getArtistsFromSpotifyByName(artistName)
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(artistData, response.body)
+        verify(artistService, times(1)).getArtistFromSpotifyByName(artistName)
     }
 
     @Test
-    fun `getArtistsByName returns NOT_FOUND when service returns anything other than ArtistDataDto`() {
+    fun `getArtistsByName returns NOT_FOUND when service returns something other than ArtistDataDto`() {
         // GIVEN
-        val artistName = "UnknownArtist"
-        // Suppose your service might return null or a different type indicating not found
-        whenever(artistService.getArtistsFromSpotifyByName(artistName)).thenReturn(null)
+        val artistName = "Nonexistent"
+        whenever(artistService.getArtistFromSpotifyByName(artistName)).thenReturn(null)
 
         // WHEN
         val response = artistResource.getArtistsByName(artistName)
 
         // THEN
-        assertEquals(HttpStatus.NOT_FOUND, response.statusCode, "Expected HTTP 404")
-        assertEquals("No artist corresponding artistname $artistName", response.body)
-        verify(artistService, times(1)).getArtistsFromSpotifyByName(artistName)
+        assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        assertNull(response.body)
+        verify(artistService, times(1)).getArtistFromSpotifyByName(artistName)
     }
 
     @Test
-    fun `getArtistsByName returns INTERNAL_SERVER_ERROR on exception`() {
+    fun `getArtistsByName returns INTERNAL_SERVER_ERROR when an exception occurs`() {
         // GIVEN
-        val artistName = "ExceptionCase"
-        whenever(artistService.getArtistsFromSpotifyByName(artistName)).thenThrow(RuntimeException("Service error"))
+        val artistName = "ErrorName"
+        whenever(artistService.getArtistFromSpotifyByName(artistName))
+            .thenThrow(RuntimeException("Boom!"))
 
         // WHEN
         val response = artistResource.getArtistsByName(artistName)
 
         // THEN
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode, "Expected HTTP 500")
-        assertNull(response.body, "Response body should be null for 500")
-        verify(artistService, times(1)).getArtistsFromSpotifyByName(artistName)
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
+        assertNull(response.body)
+        verify(artistService, times(1)).getArtistFromSpotifyByName(artistName)
     }
 
     @Test
@@ -92,7 +132,7 @@ class ArtistResourceTest {
     @Test
     fun `saveAllArtists returns INTERNAL_SERVER_ERROR on exception`() {
         // GIVEN
-        doThrow(RuntimeException("DB error")).`when`(artistService).storeArtists()
+        doThrow(RuntimeException("DB error")).whenever(artistService).storeArtists()
 
         // WHEN
         val response = artistResource.saveAllArtists()
@@ -103,15 +143,15 @@ class ArtistResourceTest {
     }
 
     @Test
-    fun `getNewestAlbum returns OK when service returns Album`() {
+    fun `getNewestAlbum returns OK when service returns an Album`() {
         // GIVEN
         val artistId = 42
         val album = Album(
-            id = "someId",
-            title = "Some Album",
+            id = "12345",
+            title = "Batman",
             releaseDate = LocalDate.of(2021, 1, 1),
         )
-        `when`(artistService.getNewAlbumForArtist(artistId)).thenReturn(album)
+        whenever(artistService.getNewAlbumForArtist(artistId)).thenReturn(album)
 
         // WHEN
         val response = artistResource.getNewestAlbum(artistId)
@@ -123,10 +163,10 @@ class ArtistResourceTest {
     }
 
     @Test
-    fun `getNewestAlbum returns NOT_FOUND when service returns not an Album`() {
+    fun `getNewestAlbum returns NOT_FOUND when service returns something other than an Album`() {
         // GIVEN
         val artistId = 999
-        `when`(artistService.getNewAlbumForArtist(artistId)).thenReturn(null)
+        whenever(artistService.getNewAlbumForArtist(artistId)).thenReturn(null)
 
         // WHEN
         val response = artistResource.getNewestAlbum(artistId)
@@ -141,14 +181,14 @@ class ArtistResourceTest {
     fun `getNewestAlbum returns INTERNAL_SERVER_ERROR on exception`() {
         // GIVEN
         val artistId = 123
-        `when`(artistService.getNewAlbumForArtist(artistId)).thenThrow(RuntimeException("Service error"))
+        whenever(artistService.getNewAlbumForArtist(artistId)).thenThrow(RuntimeException("Service error"))
 
         // WHEN
         val response = artistResource.getNewestAlbum(artistId)
 
         // THEN
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
-        assertNotNull(response.body, "Body should contain an error map on 500")
+        assertNotNull(response.body, "Body should contain an error message or map")
         verify(artistService, times(1)).getNewAlbumForArtist(artistId)
     }
 }
