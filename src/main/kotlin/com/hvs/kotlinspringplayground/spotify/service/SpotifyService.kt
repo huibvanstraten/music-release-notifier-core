@@ -1,13 +1,15 @@
 package com.hvs.kotlinspringplayground.spotify.service
 
 import com.hvs.kotlinspringplayground.artist.dto.ArtistDataDto
-import com.hvs.kotlinspringplayground.spotify.client.SpotifyClient
-import com.hvs.kotlinspringplayground.spotify.client.response.SpotifyAlbumsResponse
+import com.hvs.kotlinspringplayground.spotify.client.impl.SpotifyAsyncClient
+import com.hvs.kotlinspringplayground.spotify.client.impl.SpotifyClient
+import com.hvs.kotlinspringplayground.spotify.client.response.Album
+import kotlinx.coroutines.flow.Flow
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 
 class SpotifyService(
-    private val spotifyClient: SpotifyClient
+    private val spotifyClient: SpotifyClient,
+    private val spotifyAsyncClient: SpotifyAsyncClient,
 ) {
 
     fun getArtist(
@@ -33,10 +35,9 @@ class SpotifyService(
         }
     }
 
-    fun getAlbumsOfArtist(
+    fun getReleasesForArtist(
         artistId: String,
-        pageable: Pageable,
-    ): Page<SpotifyAlbumsResponse.AlbumItem> {
-        return spotifyClient.getArtistAlbumsPageable(artistId, pageable)
+    ): Flow<Page<Album>> {
+        return spotifyAsyncClient.getReleasesForArtist(artistId)
     }
 }

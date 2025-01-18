@@ -9,10 +9,7 @@
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="tidal_id" type="VARCHAR(50)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="spotify_id" type="VARCHAR(50)">
+            <column name="artist_id" type="VARCHAR(50)">
                 <constraints nullable="true"/>
             </column>
             <column name="name" type="VARCHAR(255)">

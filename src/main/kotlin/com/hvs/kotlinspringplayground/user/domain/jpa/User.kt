@@ -24,7 +24,7 @@ data class User(
     val username: String,
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(columnDefinition = "jsonb", name = "artist_id_list")
     val artistIdList: JsonNode?,
 ) {
 

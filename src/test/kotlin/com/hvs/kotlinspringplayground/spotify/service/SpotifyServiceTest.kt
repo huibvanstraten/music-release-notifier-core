@@ -1,7 +1,7 @@
 package com.hvs.kotlinspringplayground.spotify.service
 
-import com.hvs.kotlinspringplayground.spotify.albumItem
-import com.hvs.kotlinspringplayground.spotify.client.SpotifyClient
+import com.hvs.kotlinspringplayground.spotify.client.impl.SpotifyAsyncClient
+import com.hvs.kotlinspringplayground.spotify.client.impl.SpotifyClient
 import com.hvs.kotlinspringplayground.spotify.client.response.SpotifyArtistSearchResponse
 import com.hvs.kotlinspringplayground.spotify.spotifyArtistResponse
 import com.hvs.kotlinspringplayground.spotify.spotifyArtistSearchResponse
@@ -14,17 +14,17 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.PageRequest
 
 @ExtendWith(MockitoExtension::class)
 class SpotifyServiceTest {
 
     @Mock
     private lateinit var spotifyClient: SpotifyClient
+
+    @Mock
+    private lateinit var spotifyCAsyncClient: SpotifyAsyncClient
 
     @InjectMocks
     private lateinit var spotifyService: SpotifyService
@@ -94,30 +94,6 @@ class SpotifyServiceTest {
 
             // THEN
             assertNull(result)
-        }
-    }
-
-    @Nested
-    inner class GetAlbumsOfArtistTests {
-
-        @Test
-        fun `getAlbumsOfArtist returns the page from SpotifyClient`() {
-            // GIVEN
-            val artistId = "123"
-            val pageable = PageRequest.of(1, 5)
-            val albumList = listOf(
-                albumItem(),
-                albumItem()
-            )
-            val mockPage = PageImpl(albumList, pageable, 10)
-            whenever(spotifyClient.getArtistAlbumsPageable(artistId = eq(artistId), pageable = eq(pageable), any())).thenReturn(mockPage)
-
-            // WHEN
-            val resultPage = spotifyService.getAlbumsOfArtist(artistId, pageable)
-
-            // THEN
-            assertEquals(2, resultPage.content.size)
-            assertEquals("Test Album", resultPage.content[0].name)
         }
     }
 }

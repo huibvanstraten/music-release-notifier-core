@@ -2,9 +2,9 @@ package com.hvs.kotlinspringplayground.user.web.rest
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
-import com.hvs.kotlinspringplayground.artist.web.rest.ArtistResource.Companion.logger
 import com.hvs.kotlinspringplayground.user.domain.jpa.User
 import com.hvs.kotlinspringplayground.user.service.impl.UserService
+import mu.KotlinLogging
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
@@ -90,5 +90,9 @@ class UserResource(
             logger.error(e) { "Failed to store artists for user $username" }
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
         }
+    }
+
+    companion object {
+        val logger = KotlinLogging.logger {}
     }
 }

@@ -22,6 +22,7 @@ plugins {
     kotlin("plugin.spring") version "2.1.0"
     id("org.springframework.boot") version "3.4.0"
     id("io.spring.dependency-management") version "1.1.6"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
     kotlin("plugin.jpa") version "2.1.0"
 
     // Docker-compose plugin
@@ -71,6 +72,11 @@ dependencies {
 
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.1")
+
+
 
     // Kotlin logger
     implementation("io.github.microutils:kotlin-logging:3.0.5")

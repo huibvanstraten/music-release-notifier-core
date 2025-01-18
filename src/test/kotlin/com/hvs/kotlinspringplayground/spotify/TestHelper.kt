@@ -1,13 +1,13 @@
 package com.hvs.kotlinspringplayground.spotify
 
-import com.hvs.kotlinspringplayground.spotify.client.response.SpotifyAlbumsResponse.AlbumArtist
-import com.hvs.kotlinspringplayground.spotify.client.response.SpotifyAlbumsResponse.AlbumItem
-import com.hvs.kotlinspringplayground.spotify.client.response.SpotifyAlbumsResponse.ExternalUrls
-import com.hvs.kotlinspringplayground.spotify.client.response.SpotifyAlbumsResponse.Image
+import com.hvs.kotlinspringplayground.spotify.client.response.Album
+import com.hvs.kotlinspringplayground.spotify.client.response.Artist
+import com.hvs.kotlinspringplayground.spotify.client.response.ExternalUrls
+import com.hvs.kotlinspringplayground.spotify.client.response.Image
 import com.hvs.kotlinspringplayground.spotify.client.response.SpotifyArtistResponse
 import com.hvs.kotlinspringplayground.spotify.client.response.SpotifyArtistSearchResponse
 
-fun albumItem() = AlbumItem(
+fun albumItem() = Album(
     albumType = "album",
     totalTracks = 10,
     availableMarkets = listOf("US", "GB", "DE"),
@@ -34,7 +34,7 @@ fun albumItem() = AlbumItem(
     type = "album",
     uri = "spotify:album:abc123",
     artists = listOf(
-        AlbumArtist(
+        Artist(
             id = "artist1",
             name = "Test Artist 1",
             externalUrls = null,
@@ -43,7 +43,7 @@ fun albumItem() = AlbumItem(
             type = "album",
 
             ),
-        AlbumArtist(
+        Artist(
             id = "artist2",
             name = "Test Artist 2",
             externalUrls = null,
