@@ -2,16 +2,15 @@ package com.hvs.kotlinspringplayground.user.web.rest
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
-import com.hvs.kotlinspringplayground.user.domain.jpa.User
+import com.hvs.kotlinspringplayground.user.dto.UserDataDto
 import com.hvs.kotlinspringplayground.user.service.impl.UserService
 import mu.KotlinLogging
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.json.MappingJacksonValue
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -22,31 +21,16 @@ class UserResource(
     private val userService: UserService
 ) {
 
-    @GetMapping("/paginated")
-    fun getUsersPaginated(
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "10") size: Int,
-    ): ResponseEntity<Page<User>> {
-        if (page < 0 || size <= 0) {
-            return ResponseEntity.badRequest().build()
-        }
-
-        val pageable = PageRequest.of(page, size)
-        val userPage = userService.getUsers(pageable)
-        return ResponseEntity.ok(userPage)
-    }
-
     @GetMapping("/parameters")
     fun getUsersParametersFiltered(
         @RequestParam fields: List<String>
     ): ResponseEntity<MappingJacksonValue> {
-        val usersPage = userService.getUsers(PageRequest.of(0, 100))
-        val userList = usersPage.content
+        val users = userService.getUsers()
 
         val filterProvider = SimpleFilterProvider()
             .addFilter("userFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.toSet()))
 
-        val mapping = MappingJacksonValue(userList)
+        val mapping = MappingJacksonValue(users)
         mapping.filters = filterProvider
 
         return ResponseEntity.status(HttpStatus.OK).body(mapping)
@@ -80,14 +64,13 @@ class UserResource(
 
     @PostMapping("list")
     fun saveArtistsForUser(
-        @RequestParam username: String,
-        @RequestParam artistIdList: List<String>,
+        @RequestBody user: UserDataDto,
     ): ResponseEntity<Void> {
         return try {
-            userService.storeArtistListForUser(username,artistIdList)
+            userService.storeArtistListForUser(user)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
-            logger.error(e) { "Failed to store artists for user $username" }
+            logger.error(e) { "Failed to store artists for user ${user.username}" }
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
         }
     }

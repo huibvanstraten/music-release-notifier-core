@@ -3,11 +3,11 @@ package com.hvs.kotlinspringplayground.user.service
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.hvs.kotlinspringplayground.user.domain.jpa.User
+import com.hvs.kotlinspringplayground.user.dto.UserDataDto
 import com.hvs.kotlinspringplayground.user.repository.UserRepository
 import com.hvs.kotlinspringplayground.user.service.impl.UserService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -19,8 +19,6 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.PageRequest
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -33,22 +31,24 @@ class UserServiceTest {
     private lateinit var userService: UserService
 
     @Test
-    fun `getUsers calls findAll with given pageable and returns the page`() {
+    fun `getUsers calls findAll and returns list of users`() {
         // GIVEN
-        val pageable = PageRequest.of(0, 5)
         val userList = listOf(
-            User(id = UUID.randomUUID(), username = "user1", artistIdList = mapper.createObjectNode()),
-            User(id = UUID.randomUUID(), username = "user2", artistIdList = mapper.createObjectNode())
+            User(id = UUID.randomUUID(), username = "user1", artistIdList = mapper.createArrayNode()),
+            User(id = UUID.randomUUID(), username = "user2", artistIdList = mapper.createArrayNode().add("id")),
         )
-        val pageImpl = PageImpl(userList, pageable, userList.size.toLong())
-        whenever(userRepository.findAll(pageable)).thenReturn(pageImpl)
+        whenever(userRepository.findAll()).thenReturn(userList)
 
         // WHEN
-        val result = userService.getUsers(pageable)
+        val result = userService.getUsers()
 
         // THEN
-        assertEquals(pageImpl, result)
-        verify(userRepository, times(1)).findAll(pageable)
+        verify(userRepository, times(1)).findAll()
+        assertEquals(result[1].username, "user2")
+        assertEquals(result[0].artistIdList, emptyList<String>())
+        assertEquals(result[1].artistIdList.size, 1)
+        assertEquals(result[1].artistIdList.first(), "id")
+
     }
 
     @Test
@@ -134,11 +134,9 @@ class UserServiceTest {
     fun `storeArtistListForUser appends new artists distinctively and saves`() {
         // GIVEN
         val username = "testUser"
-        val existingUserId = UUID.randomUUID()
         val storedArtistIds = jacksonObjectMapper().valueToTree<JsonNode>(listOf("testId1", "testId2"))
 
         val userInDb = User(
-            id = existingUserId,
             username = username,
             artistIdList = storedArtistIds
         )
@@ -150,7 +148,7 @@ class UserServiceTest {
         }.whenever(userRepository).save(any<User>())
 
         // WHEN
-        userService.storeArtistListForUser(username, listOf("testId1", "testId2"))
+        userService.storeArtistListForUser(UserDataDto(username, listOf("testId1", "testId2")))
 
         // THEN
 
@@ -159,19 +157,7 @@ class UserServiceTest {
         verify(userRepository, times(1)).save(captor.capture())
 
         assertEquals(username, captor.firstValue.username)
-        assertEquals(existingUserId, captor.firstValue.id)
         assertEquals(storedArtistIds, captor.firstValue.artistIdList)
-    }
-
-    @Test
-    fun `storeArtistListForUser throws if user not found`() {
-        // GIVEN
-        val username = "invalidUser"
-        whenever(userRepository.findByUsername(username)).thenReturn(null)
-
-        assertThrows<IllegalArgumentException> {
-            userService.storeArtistListForUser(username, listOf("artistX"))
-        }
     }
 
     companion object {
