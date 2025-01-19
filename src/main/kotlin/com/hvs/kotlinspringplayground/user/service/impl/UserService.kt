@@ -2,22 +2,27 @@ package com.hvs.kotlinspringplayground.user.service.impl
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.hvs.kotlinspringplayground.user.domain.jpa.User
 import com.hvs.kotlinspringplayground.user.dto.UserDataDto
 import com.hvs.kotlinspringplayground.user.repository.UserRepository
 import com.hvs.kotlinspringplayground.user.service.UserService
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 
 class UserService(
     private val userRepository: UserRepository,
 ): UserService {
 
-    override fun getUsers(pageable: Pageable): Page<User> = userRepository.findAll(pageable)
+    override fun getUsers(): List<UserDataDto> = userRepository.findAll().map {
+        UserDataDto(
+            username = it.username,
+            artistIdList = jacksonObjectMapper().convertValue(it.artistIdList, object : TypeReference<List<String>>() {}),
+        )
+    }
 
     override fun createUser(userName: String) {
         val userDataDto = UserDataDto(
             username = userName,
+            artistIdList = emptyList()
         )
         userRepository.save(User.from(userDataDto))
     }
@@ -32,16 +37,13 @@ class UserService(
     }
 
     override fun storeArtistListForUser(
-        username: String,
-        artists: List<String>
+        userDto: UserDataDto,
     ) {
-
-        val (user, currentArtists: List<String>?) = getUserWithArtistIdList(username)
+        val (user, currentArtists: List<String>?) = getUserWithArtistIdList(userDto.username)
 
         val userDto = UserDataDto(
-            id = user.id,
             username = user.username,
-            artistIdList = ((currentArtists ?: emptyList()) + artists).distinct()
+            artistIdList = ((currentArtists ?: emptyList()) + userDto.artistIdList).distinct()
         )
 
         userRepository.save(User.from(userDto))

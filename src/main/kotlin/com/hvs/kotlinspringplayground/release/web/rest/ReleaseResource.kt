@@ -1,14 +1,10 @@
 package com.hvs.kotlinspringplayground.release.web.rest
 
-import com.hvs.kotlinspringplayground.release.domain.jpa.Release
-import com.hvs.kotlinspringplayground.release.service.ReleaseService
 import com.hvs.kotlinspringplayground.release.web.rest.response.ReleasePagedResponse
-import com.hvs.kotlinspringplayground.user.domain.jpa.User
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -16,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/release")
 class ReleaseResource(
-    private val releaseService: ReleaseService
+    private val releaseService: com.hvs.kotlinspringplayground.release.service.ReleaseService
 ) {
 
     @GetMapping
@@ -33,12 +29,12 @@ class ReleaseResource(
 
             val nextOffset = offset + limit
             val nextLink = if (nextOffset < total) {
-                "/releases?artistId=$artistId&offset=$nextOffset&limit=$limit"
+                "/release?artistId=$artistId&offset=$nextOffset&limit=$limit"
             } else null
 
             val prevOffset = (offset - limit).coerceAtLeast(0)
             val prevLink = if (offset > 0) {
-                "/releases?artistId=$artistId&offset=$prevOffset&limit=$limit"
+                "/release?artistId=$artistId&offset=$prevOffset&limit=$limit"
             } else null
 
             val response = ReleasePagedResponse(
@@ -57,13 +53,12 @@ class ReleaseResource(
         }
     }
 
-    @PostMapping("/new")
-    fun newRelease(
-        @RequestParam user: User,
-        @RequestParam artistName: String,
-        @RequestParam release: Release,
-    ) {
-        // TODO()
+    @GetMapping("/new")
+    fun newReleaseMessage(
+        @RequestParam releaseId: String,
+    ): ResponseEntity<Unit> {
+        releaseService.sendMessageForNewRelease(releaseId)
+        return ResponseEntity.ok().build()
     }
 
     companion object {

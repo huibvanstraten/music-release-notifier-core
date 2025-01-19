@@ -19,7 +19,7 @@ import java.util.UUID
 data class User(
 
     @Id
-    val id: UUID,
+    val id: UUID = UUID.randomUUID(),
 
     val username: String,
 
@@ -31,7 +31,6 @@ data class User(
     companion object {
         fun from(userData: UserDataDto): User = with(userData) {
             User(
-                id = this.id,
                 username = this.username,
                 artistIdList = jacksonObjectMapper().convertValue(this.artistIdList),
             )

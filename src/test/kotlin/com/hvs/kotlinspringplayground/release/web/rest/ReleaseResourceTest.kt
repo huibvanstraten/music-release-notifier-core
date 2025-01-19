@@ -1,7 +1,7 @@
 package com.hvs.kotlinspringplayground.release.web.rest
 
 import com.hvs.kotlinspringplayground.release.domain.jpa.Release
-import com.hvs.kotlinspringplayground.release.service.ReleaseService
+import com.hvs.kotlinspringplayground.release.service.impl.ReleaseService
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

@@ -1,7 +1,9 @@
 package com.hvs.kotlinspringplayground.release.service
 
+import com.hvs.kotlinspringplayground.outbox.service.OutboxService
 import com.hvs.kotlinspringplayground.release.domain.jpa.Release
 import com.hvs.kotlinspringplayground.release.repository.ReleaseRepository
+import com.hvs.kotlinspringplayground.release.service.impl.ReleaseService
 import com.hvs.kotlinspringplayground.spotify.client.response.Album
 import com.hvs.kotlinspringplayground.spotify.client.response.ExternalUrls
 import com.hvs.kotlinspringplayground.spotify.service.SpotifyService
@@ -21,9 +23,10 @@ import java.time.LocalDate
 class ReleaseServiceTest {
 
     private val spotifyService: SpotifyService = mock()
+    private val outboxService: OutboxService = mock()
     private val releaseRepository: ReleaseRepository = mock()
 
-    private val releaseService = ReleaseService(spotifyService, releaseRepository)
+    private val releaseService = ReleaseService(spotifyService, outboxService, releaseRepository)
 
     @Test
     fun `storeAllReleasesForArtist should collect pages from spotify and save them to repository`() = runBlocking {

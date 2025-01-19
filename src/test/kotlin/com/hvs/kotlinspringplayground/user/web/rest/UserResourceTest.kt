@@ -1,26 +1,23 @@
 package com.hvs.kotlinspringplayground.user.web.rest
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.hvs.kotlinspringplayground.user.domain.jpa.User
+import com.hvs.kotlinspringplayground.user.dto.UserDataDto
 import com.hvs.kotlinspringplayground.user.service.impl.UserService
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.whenever
-import org.mockito.junit.jupiter.MockitoExtension
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.json.MappingJacksonValue
-import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class UserResourceTest {
@@ -32,54 +29,11 @@ class UserResourceTest {
     private lateinit var userResource: UserResource
 
     @Test
-    fun `getUsersPaginated returns BAD_REQUEST when page is negative`() {
-        // WHEN
-        val response = userResource.getUsersPaginated(page = -1, size = 10)
-
-        // THEN
-        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
-        assertNull(response.body)
-        verify(userService, times(0)).getUsers(any())
-    }
-
-    @Test
-    fun `getUsersPaginated returns BAD_REQUEST when size is not positive`() {
-        // WHEN
-        val response = userResource.getUsersPaginated(page = 0, size = 0)
-
-        // THEN
-        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
-        assertNull(response.body)
-        verify(userService, times(0)).getUsers(any())
-    }
-
-    @Test
-    fun `getUsersPaginated returns OK with page of users`() {
-        // GIVEN
-        val pageReq = PageRequest.of(0, 10)
-        val users = userList()
-        val mockPage: Page<User> = PageImpl(users, pageReq, 2)
-
-        whenever(userService.getUsers(pageReq)).thenReturn(mockPage)
-
-        // WHEN
-        val response = userResource.getUsersPaginated(page = 0, size = 10)
-
-        // THEN
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertNotNull(response.body)
-        assertEquals(mockPage, response.body)
-        verify(userService, times(1)).getUsers(pageReq)
-    }
-
-    @Test
     fun `getUsersParametersFiltered returns OK and filters fields`() {
         // GIVEN
-        val pageReq = PageRequest.of(0, 100)
         val users = userList()
-        val mockPage: Page<User> = PageImpl(users, pageReq, 2)
 
-        whenever(userService.getUsers(pageReq)).thenReturn(mockPage)
+        whenever(userService.getUsers()).thenReturn(users)
 
         val fields = listOf("username", "artistIdList")
 
@@ -94,7 +48,7 @@ class UserResourceTest {
         val filterProvider = (mapping as MappingJacksonValue).filters
         assertTrue(filterProvider is SimpleFilterProvider)
 
-        verify(userService, times(1)).getUsers(pageReq)
+        verify(userService, times(1)).getUsers()
     }
 
     @Test
@@ -160,46 +114,40 @@ class UserResourceTest {
     @Test
     fun `saveArtistsForUser returns OK when userService completes successfully`() {
         // GIVEN
-        val username = "TestUser"
-        val artists = listOf("artist1", "artist2")
+        val dto = UserDataDto(username = "TestUser", listOf("artist1", "artist2"))
+
 
         // WHEN
-        val response = userResource.saveArtistsForUser(username, artists)
+        val response = userResource.saveArtistsForUser(dto)
 
         // THEN
         assertEquals(HttpStatus.OK, response.statusCode)
-        verify(userService, times(1)).storeArtistListForUser(username, artists)
+        verify(userService, times(1)).storeArtistListForUser(dto)
     }
 
     @Test
     fun `saveArtistsForUser returns INTERNAL_SERVER_ERROR when userService throws`() {
         // GIVEN
-        val username = "UnknownUser"
-        val artists = listOf("artist1", "artist2")
+        val dto = UserDataDto(username = "TestUser", listOf("artist1", "artist2"))
         doThrow(RuntimeException("Failed to store artists")).whenever(userService)
-            .storeArtistListForUser(username, artists)
+            .storeArtistListForUser(dto)
 
         // WHEN
-        val response = userResource.saveArtistsForUser(username, artists)
+        val response = userResource.saveArtistsForUser(dto)
 
         // THEN
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
-        verify(userService, times(1)).storeArtistListForUser(username, artists)
+        verify(userService, times(1)).storeArtistListForUser(dto)
     }
 
     private fun userList() = listOf(
-        User(
+        UserDataDto(
             username = "testUser1",
-            id = UUID.randomUUID(),
-            artistIdList = mapper.createObjectNode()
-        ), User(
+            artistIdList = listOf("testId1", "testId2")
+        ),
+        UserDataDto(
             username = "testUser2",
-            id = UUID.randomUUID(),
-            artistIdList = mapper.createObjectNode()
+            artistIdList = listOf("testId1", "testId2")
         )
     )
-
-    companion object {
-        private val mapper = jacksonObjectMapper()
-    }
 }

@@ -1,12 +1,10 @@
 package com.hvs.kotlinspringplayground.user.service
 
-import com.hvs.kotlinspringplayground.user.domain.jpa.User
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
+import com.hvs.kotlinspringplayground.user.dto.UserDataDto
 
 interface UserService {
 
-    fun getUsers(pageable: Pageable): Page<User>
+    fun getUsers(): List<UserDataDto>
 
     fun getTotalUsers(): Long
 
@@ -14,5 +12,5 @@ interface UserService {
 
     fun getArtistIdListForUser(username: String): List<String>?
 
-    fun storeArtistListForUser(userName: String, artists: List<String>)
+    fun storeArtistListForUser(user: UserDataDto)
 }
