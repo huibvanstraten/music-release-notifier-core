@@ -62,10 +62,14 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-rest")
-    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework:spring-context")
+
+    // Security
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.security:spring-security-oauth2-resource-server:6.4.2")
+    implementation("org.springframework.security:spring-security-oauth2-jose:6.4.2")
 
     // Jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -75,8 +79,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.1")
-
-
 
     // Kotlin logger
     implementation("io.github.microutils:kotlin-logging:3.0.5")

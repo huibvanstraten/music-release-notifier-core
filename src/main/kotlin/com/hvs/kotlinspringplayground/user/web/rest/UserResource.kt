@@ -38,10 +38,11 @@ class UserResource(
 
     @PostMapping
     fun createUser(
+        @RequestParam userId: String,
         @RequestParam username: String,
     ): ResponseEntity<Void> {
         return try {
-            userService.createUser(username)
+            userService.createUser(userId, username)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             logger.error(e) { "Failed to store artists" }

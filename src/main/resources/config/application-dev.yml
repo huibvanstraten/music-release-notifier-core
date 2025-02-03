@@ -16,14 +16,6 @@ spring:
         jwt:
           jwk-set-uri: http://localhost:7080/realms/music-release-notifier/protocol/openid-connect/certs
 
-
-
-  rabbitmq:
-    publisher-confirm-type: correlated
-    publisher-returns: true
-    template:
-      mandatory: true
-
   datasource:
     url: jdbc:postgresql://localhost:5432/music-release-notifier
     driver-class-name: org.postgresql.Driver
@@ -49,20 +41,6 @@ spring:
 
 cors:
   allowed-origins: http://localhost:4201
-
-tidal:
-  client-id: # env vars
-  client-secret: # env vars
-
-spotify:
-  client-id: # env vars
-  client-secret: # env vars
-
-outbox:
-  publisher:
-    cloudevent-source: "com.hvs.kotlinspringplayground"
-    polling-rate: PT10S
-  database: postgres
 
 rabbitmq:
   exchange: "music_monitor"

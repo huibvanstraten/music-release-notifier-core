@@ -14,13 +14,15 @@ class UserService(
 
     override fun getUsers(): List<UserDataDto> = userRepository.findAll().map {
         UserDataDto(
+            userId = it.id,
             username = it.username,
             artistIdList = jacksonObjectMapper().convertValue(it.artistIdList, object : TypeReference<List<String>>() {}),
         )
     }
 
-    override fun createUser(userName: String) {
+    override fun createUser(userId: String, userName: String) {
         val userDataDto = UserDataDto(
+            userId = userId,
             username = userName,
             artistIdList = emptyList()
         )
@@ -32,30 +34,29 @@ class UserService(
     override fun getArtistIdListForUser(
         username: String,
     ): List<String>? {
-        val (_, currentArtists: List<String>?) = getUserWithArtistIdList(username)
+        val currentArtists: List<String>? = getUserWithArtistIdList(username)
         return currentArtists
     }
 
     override fun storeArtistListForUser(
         userDto: UserDataDto,
     ) {
-        val (user, currentArtists: List<String>?) = getUserWithArtistIdList(userDto.username)
+        val currentArtists: List<String>? = getUserWithArtistIdList(userDto.username)
 
-        val userDto = UserDataDto(
-            username = user.username,
+        val updatedUserDto = userDto.copy(
             artistIdList = ((currentArtists ?: emptyList()) + userDto.artistIdList).distinct()
         )
 
-        userRepository.save(User.from(userDto))
+        userRepository.save(User.from(updatedUserDto))
     }
 
-    private fun getUserWithArtistIdList(username: String): Pair<User, List<String>?> {
-        val user = requireNotNull(userRepository.findByUsername(username))
+    private fun getUserWithArtistIdList(username: String): List<String>? {
+        val user = userRepository.findByUsername(username)
 
         val objectMapper = ObjectMapper()
-        val currentArtists = user.artistIdList?.let {
+        val currentArtists = user?.artistIdList?.let {
             objectMapper.convertValue(it, object : TypeReference<MutableList<String>>() {})
         }
-        return Pair(user, currentArtists)
+        return currentArtists
     }
 }
