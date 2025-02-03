@@ -6,7 +6,7 @@
 
     <changeSet id="2-create-users-table" author="HvS">
         <createTable tableName="users">
-            <column name="id" type="uuid">
+            <column name="id" type="varchar(50)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="username" type="VARCHAR(255)">
