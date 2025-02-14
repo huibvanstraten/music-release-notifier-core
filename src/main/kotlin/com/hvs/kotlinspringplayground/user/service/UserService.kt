@@ -8,9 +8,9 @@ interface UserService {
 
     fun getTotalUsers(): Long
 
-    fun createUser(userId: String, userName: String)
+    fun createUser(userId: String, username: String)
 
     fun getArtistIdListForUser(username: String): List<String>?
 
-    fun storeArtistListForUser(user: UserDataDto)
+    fun storeArtistListForUser(userDto: UserDataDto)
 }

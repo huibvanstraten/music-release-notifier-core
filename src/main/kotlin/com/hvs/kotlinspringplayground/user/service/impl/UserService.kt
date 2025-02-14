@@ -20,10 +20,10 @@ class UserService(
         )
     }
 
-    override fun createUser(userId: String, userName: String) {
+    override fun createUser(userId: String, username: String) {
         val userDataDto = UserDataDto(
             userId = userId,
-            username = userName,
+            username = username,
             artistIdList = emptyList()
         )
         userRepository.save(User.from(userDataDto))

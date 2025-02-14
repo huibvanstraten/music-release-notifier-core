@@ -19,7 +19,10 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
-import java.util.UUID
+
+const val ID =  "7fba1f85-7d7d-45bf-9303-a7e191ee9328"
+const val USERNAME_1 = "user1"
+const val USERNAME_2 = "user2"
 
 @ExtendWith(MockitoExtension::class)
 class UserServiceTest {
@@ -34,8 +37,8 @@ class UserServiceTest {
     fun `getUsers calls findAll and returns list of users`() {
         // GIVEN
         val userList = listOf(
-            User(id = UUID.randomUUID(), username = "user1", artistIdList = mapper.createArrayNode()),
-            User(id = UUID.randomUUID(), username = "user2", artistIdList = mapper.createArrayNode().add("id")),
+            User(id = ID, username = USERNAME_1, artistIdList = mapper.createArrayNode()),
+            User(id = ID, username = USERNAME_2, artistIdList = mapper.createArrayNode().add("id")),
         )
         whenever(userRepository.findAll()).thenReturn(userList)
 
@@ -44,36 +47,33 @@ class UserServiceTest {
 
         // THEN
         verify(userRepository, times(1)).findAll()
-        assertEquals(result[1].username, "user2")
+        assertEquals(result[1].username, USERNAME_2)
         assertEquals(result[0].artistIdList, emptyList<String>())
         assertEquals(result[1].artistIdList.size, 1)
         assertEquals(result[1].artistIdList.first(), "id")
-
     }
 
     @Test
     fun `createUser saves a new user`() {
-        // GIVEN
-        val userName = "john_doe"
 
         // WHEN
-        userService.createUser(userName)
+        userService.createUser(ID, USERNAME_1)
 
         // THEN
         val captor: KArgumentCaptor<User> = argumentCaptor<User>()
 
         verify(userRepository, times(1)).save(captor.capture())
 
-        assertEquals(userName, captor.firstValue.username)
+        assertEquals(USERNAME_1, captor.firstValue.username)
     }
 
     @Test
     fun `getTotalUsers returns size of findAll list`() {
         // GIVEN
         val userList = listOf(
-            User(id = UUID.randomUUID(), username = "user1", artistIdList = mapper.createObjectNode()),
-            User(id = UUID.randomUUID(), username = "user2", artistIdList = mapper.createObjectNode()),
-            User(id = UUID.randomUUID(), username = "user3", artistIdList = mapper.createObjectNode())
+            User(id = ID, username = USERNAME_1, artistIdList = mapper.createObjectNode()),
+            User(id = ID, username = USERNAME_2, artistIdList = mapper.createObjectNode()),
+            User(id = ID, username = USERNAME_1, artistIdList = mapper.createObjectNode())
         )
         whenever(userRepository.findAll()).thenReturn(userList)
 
@@ -88,67 +88,63 @@ class UserServiceTest {
     @Test
     fun `getArtistIdListForUser returns artist list when found`() {
         // GIVEN
-        val username = "Test"
-        val userId = UUID.randomUUID()
         val storedArtistIds = jacksonObjectMapper().valueToTree<JsonNode>(listOf("testId1", "testId2"))
 
         val user = User(
-            id = userId,
-            username = username,
+            id = ID,
+            username = USERNAME_1,
             artistIdList = storedArtistIds
         )
-        whenever(userRepository.findByUsername(username)).thenReturn(user)
+        whenever(userRepository.findByUsername(USERNAME_1)).thenReturn(user)
 
         // WHEN
-        val result = userService.getArtistIdListForUser(username)
+        val result = userService.getArtistIdListForUser(USERNAME_1)
 
         // THEN
         assertEquals(listOf("testId1", "testId2"), result)
-        verify(userRepository, times(1)).findByUsername(username)
+        verify(userRepository, times(1)).findByUsername(USERNAME_1)
     }
 
     @Test
     fun `getArtistIdListForUser returns null for artist list when no artists found`() {
         // GIVEN
-        val username = "NotExistingTestUser"
-        val userId = UUID.randomUUID()
         val storedArtistIds = null
 
         val user = User(
-            id = userId,
-            username = username,
+            id = ID,
+            username = USERNAME_1,
             artistIdList = storedArtistIds
         )
-        whenever(userRepository.findByUsername(username)).thenReturn(user)
+        whenever(userRepository.findByUsername(USERNAME_1)).thenReturn(user)
 
         // WHEN
-        val result = userService.getArtistIdListForUser(username)
+        val result = userService.getArtistIdListForUser(USERNAME_1)
 
         // THEN
         assertEquals(null, result)
-        verify(userRepository, times(1)).findByUsername(username)
+        verify(userRepository, times(1)).findByUsername(USERNAME_1)
     }
 
 
     @Test
     fun `storeArtistListForUser appends new artists distinctively and saves`() {
         // GIVEN
-        val username = "testUser"
         val storedArtistIds = jacksonObjectMapper().valueToTree<JsonNode>(listOf("testId1", "testId2"))
 
         val userInDb = User(
-            username = username,
+            id = ID,
+            username = USERNAME_1,
             artistIdList = storedArtistIds
         )
 
-        whenever(userRepository.findByUsername(username)).thenReturn(userInDb)
+        whenever(userRepository.findByUsername(USERNAME_1)).thenReturn(userInDb)
         doAnswer { invocation ->
             val userArg = invocation.arguments[0] as User
             userArg
         }.whenever(userRepository).save(any<User>())
 
         // WHEN
-        userService.storeArtistListForUser(UserDataDto(username, listOf("testId1", "testId2")))
+        userService.storeArtistListForUser(UserDataDto(userId = ID, username = USERNAME_1, artistIdList = listOf("testId1", "testId2") ))
 
         // THEN
 
@@ -156,7 +152,7 @@ class UserServiceTest {
 
         verify(userRepository, times(1)).save(captor.capture())
 
-        assertEquals(username, captor.firstValue.username)
+        assertEquals(USERNAME_1, captor.firstValue.username)
         assertEquals(storedArtistIds, captor.firstValue.artistIdList)
     }
 

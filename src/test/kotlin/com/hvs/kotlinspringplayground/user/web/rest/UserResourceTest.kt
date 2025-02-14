@@ -2,6 +2,8 @@ package com.hvs.kotlinspringplayground.user.web.rest
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import com.hvs.kotlinspringplayground.user.dto.UserDataDto
+import com.hvs.kotlinspringplayground.user.service.ID
+import com.hvs.kotlinspringplayground.user.service.USERNAME_1
 import com.hvs.kotlinspringplayground.user.service.impl.UserService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -35,7 +37,7 @@ class UserResourceTest {
 
         whenever(userService.getUsers()).thenReturn(users)
 
-        val fields = listOf("username", "artistIdList")
+        val fields = listOf(USERNAME_1, "artistIdList")
 
         // WHEN
         val response = userResource.getUsersParametersFiltered(fields)
@@ -53,46 +55,42 @@ class UserResourceTest {
 
     @Test
     fun `createUser returns OK when userService completes successfully`() {
-        // GIVEN
-        val username = "TestUser"
 
         // WHEN
-        val response = userResource.createUser(username)
+        val response = userResource.createUser(ID, USERNAME_1)
 
         // THEN
         assertEquals(HttpStatus.OK, response.statusCode)
-        verify(userService, times(1)).createUser(username)
+        verify(userService, times(1)).createUser(ID, USERNAME_1)
     }
 
     @Test
     fun `createUser returns INTERNAL_SERVER_ERROR when userService throws`() {
         // GIVEN
-        val username = "ErrorUser"
-        doThrow(RuntimeException("DB error")).whenever(userService).createUser(username)
+        doThrow(RuntimeException("DB error")).whenever(userService).createUser(ID, USERNAME_1)
 
         // WHEN
-        val response = userResource.createUser(username)
+        val response = userResource.createUser(ID, USERNAME_1)
 
         // THEN
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
-        verify(userService, times(1)).createUser(username)
+        verify(userService, times(1)).createUser(ID, USERNAME_1)
     }
 
     @Test
     fun `getArtistIdListForUser returns OK and list of artist IDs when service succeeds`() {
         // GIVEN
-        val username = "TestUser"
         val artistIds = listOf("artist1", "artist2")
 
-        whenever(userService.getArtistIdListForUser(username)).thenReturn(artistIds)
+        whenever(userService.getArtistIdListForUser(USERNAME_1)).thenReturn(artistIds)
 
         // WHEN
-        val response = userResource.getArtistIdListForUser(username)
+        val response = userResource.getArtistIdListForUser(USERNAME_1)
 
         // THEN
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(artistIds, response.body)
-        verify(userService, times(1)).getArtistIdListForUser(username)
+        verify(userService, times(1)).getArtistIdListForUser(USERNAME_1)
     }
 
     @Test
@@ -114,7 +112,7 @@ class UserResourceTest {
     @Test
     fun `saveArtistsForUser returns OK when userService completes successfully`() {
         // GIVEN
-        val dto = UserDataDto(username = "TestUser", listOf("artist1", "artist2"))
+        val dto = UserDataDto(userId = ID, username = "TestUser", artistIdList = listOf("artist1", "artist2"))
 
 
         // WHEN
@@ -128,7 +126,7 @@ class UserResourceTest {
     @Test
     fun `saveArtistsForUser returns INTERNAL_SERVER_ERROR when userService throws`() {
         // GIVEN
-        val dto = UserDataDto(username = "TestUser", listOf("artist1", "artist2"))
+        val dto = UserDataDto(userId = ID, username = "TestUser", artistIdList = listOf("artist1", "artist2"))
         doThrow(RuntimeException("Failed to store artists")).whenever(userService)
             .storeArtistListForUser(dto)
 
@@ -142,10 +140,12 @@ class UserResourceTest {
 
     private fun userList() = listOf(
         UserDataDto(
+            userId = ID,
             username = "testUser1",
             artistIdList = listOf("testId1", "testId2")
         ),
         UserDataDto(
+            userId = ID,
             username = "testUser2",
             artistIdList = listOf("testId1", "testId2")
         )
