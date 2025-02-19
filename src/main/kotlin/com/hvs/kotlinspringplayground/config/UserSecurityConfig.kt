@@ -48,8 +48,8 @@ class SecurityConfig {
             .cors(Customizer.withDefaults())
             .csrf { csrf -> csrf.ignoringRequestMatchers("/api/v1/**") }
             .authorizeHttpRequests { authorize ->
-                authorize.requestMatchers(antMatcher(GET, "/api/v1/user/parameters")).hasAuthority("manage-account")
-//                authorize.anyRequest().authenticated()
+//                authorize.requestMatchers(antMatcher(GET, "/api/v1/user/parameters")).hasAuthority("manage-account")
+                authorize.anyRequest().authenticated()
             }
             .sessionManagement { sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .oauth2ResourceServer { resourceServer ->
