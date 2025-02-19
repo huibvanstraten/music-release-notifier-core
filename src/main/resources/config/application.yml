@@ -7,7 +7,7 @@ spring:
 #        registration:
 #          keycloak:
 #            client-id: music-release-notifier-client-credentials
-#            client-secret: HBz2L6Apo6g2w1ohVM2S3wul6Dv8zH85
+#            client-secret:
 #            scope:
 #              - profile
 #              - openid
@@ -25,10 +25,10 @@ spring:
       mandatory: true
 
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:music-release-notifier}
     driver-class-name: org.postgresql.Driver
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
@@ -48,7 +48,7 @@ spring:
     enabled: true
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
 
 tidal:
   client-id: # env vars
@@ -65,7 +65,7 @@ outbox:
   database: postgres
 
 rabbitmq:
-  exchange: ${RABBITMQ_EXCHANGE}
-  queue: ${RABBITMQ_QUEUE}
-  routing-key: ${RABBITMQ_ROUTING_KEY}
+  exchange: ${RABBITMQ_EXCHANGE:music_monitor}
+  queue: ${RABBITMQ_QUEUE:release}
+  routing-key: ${RABBITMQ_ROUTING_KEY:release_routing_key}
   delivery-timeout: 1
