@@ -1,0 +1,32 @@
+stages:
+  - build
+  - deploy
+
+Build:
+  stage: build
+  image: gradle:8.8.0-alpine
+  script:
+    - gradle --build-cache clean build --info --stacktrace || {
+      echo "Tests failed. Displaying test report logs:";
+      for file in build/test-results/test/*.xml; do
+      echo "----- $file -----";
+      cat "$file";
+      done;
+      exit 1;
+      }
+  artifacts:
+    when: always
+    expire_in: 1 days
+    paths:
+      - build/libs/*.jar
+      - build/test-results/test/*.xml
+    reports:
+      junit:
+        - build/test-results/test/*.xml
+
+
+Deploy:
+  stage: deploy
+  script:
+    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
+  environment: production
