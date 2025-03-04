@@ -52,6 +52,7 @@ services:
             KC_HOSTNAME_STRICT_BACKCHANNEL: "true"
             KEYCLOAK_ADMIN: admin
             KEYCLOAK_ADMIN_PASSWORD: admin
+            KEYCLOAK_IMPORT: /opt/keycloak/data/import/realm-config.json
             KC_HEALTH_ENABLED: "true"
             KC_LOG_LEVEL: info
         healthcheck:
@@ -59,7 +60,9 @@ services:
             interval: 15s
             timeout: 2s
             retries: 15
-        command: ["start-dev", "--http-port", "7080", "--https-port", "7443"]
+        volumes:
+            - ./realm-config.json:/opt/keycloak/data/import/realm-config.json
+        command: [ "start-dev", "--import-realm" ]
         ports:
             - "7080:7080"
             - "7443:7443"
