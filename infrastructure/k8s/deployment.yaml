@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: core
-          image: crmrntest.azurecr.io/mrncore:20
+          image: crmrntest.azurecr.io/mrncore:25
           ports:
             - containerPort: 80
 
