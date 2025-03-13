@@ -6,7 +6,7 @@ stages:
 
 variables:
   ACR_URL: "crmrntest.azurecr.io"
-  DOCKER_IMAGE: "mrnbackend"
+  DOCKER_IMAGE: "mrncore"
   AZURE_RESOURCE_GROUP: "project-huib"
   AZURE_AKS_CLUSTER: "aks-mrn-test"
   AZURE_SUBSCRIPTION_ID: $mrn_settings_azure_subscription_id

@@ -1,23 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-deployment
+  name: core-deployment
   namespace: default
   labels:
-    app: backend
+    app: core
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: core
   template:
     metadata:
       labels:
-        app: backend
+        app: core
     spec:
       containers:
-        - name: backend
-          image: crmrntest.azurecr.io/mrnbackend:20
+        - name: core
+          image: crmrntest.azurecr.io/mrncore:20
           ports:
             - containerPort: 80
+
 
