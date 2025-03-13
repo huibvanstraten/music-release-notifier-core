@@ -1,32 +1,26 @@
 stages:
-  - build
-  - deploy
+  - push
+  # - package
+  # - deploy
+  # - rollback
 
-Build:
-  stage: build
-  image: gradle:8.8.0-alpine
+variables:
+  ACR_URL: "crmrntest.azurecr.io"
+  DOCKER_IMAGE: "mrnbackend"
+  AZURE_RESOURCE_GROUP: "project-huib"
+  AZURE_AKS_CLUSTER: "aks-mrn-test"
+  AZURE_SUBSCRIPTION_ID: $mrn_settings_azure_subscription_id
+  AZURE_CLIENT_ID: $mrn_settings_azure_service_principal_app_id
+  AZURE_CLIENT_SECRET: $mrn_settings_azure_service_principal_app_password
+  AZURE_TENANT_ID: $mrn_settings_azure_tenant_id
+
+push_image:
+  stage: push
+  image: docker:stable
+  services:
+      - docker:dind
   script:
-    - gradle --build-cache clean build --info --stacktrace || {
-      echo "Tests failed. Displaying test report logs:";
-      for file in build/test-results/test/*.xml; do
-      echo "----- $file -----";
-      cat "$file";
-      done;
-      exit 1;
-      }
-  artifacts:
-    when: always
-    expire_in: 1 days
-    paths:
-      - build/libs/*.jar
-      - build/test-results/test/*.xml
-    reports:
-      junit:
-        - build/test-results/test/*.xml
-
-
-Deploy:
-  stage: deploy
-  script:
-    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
-  environment: production
+    - docker build -t $DOCKER_IMAGE:$CI_PIPELINE_IID .
+    - docker image tag $DOCKER_IMAGE:$CI_PIPELINE_IID $ACR_URL/$DOCKER_IMAGE:$CI_PIPELINE_IID
+    - docker login $ACR_URL -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET
+    - docker image push $ACR_URL/$DOCKER_IMAGE:$CI_PIPELINE_IID
