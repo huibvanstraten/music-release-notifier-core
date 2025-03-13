@@ -44,6 +44,6 @@ spec:
     spec:
       containers:
         - name: keycloak
-          image: crmrntest.azurecr.io/mrnkeycloak:27
+          image: crmrntest.azurecr.io/mrnkeycloak:29
           ports:
             - containerPort: 80
