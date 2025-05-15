@@ -1,6 +1,7 @@
 package com.hvs.kotlinspringplayground.artist.web.rest
 
 import com.hvs.kotlinspringplayground.artist.dto.ArtistDataDto
+import com.hvs.kotlinspringplayground.artist.dto.ArtistProfileDataDto
 import com.hvs.kotlinspringplayground.artist.service.ArtistService
 import com.hvs.kotlinspringplayground.tidal.domain.Album
 import mu.KotlinLogging
@@ -31,6 +32,21 @@ class ArtistResource(
         }
     }
 
+    @GetMapping("/profile")
+    fun getArtistProfileData(
+        @RequestParam artistName: String
+    ): ResponseEntity<ArtistProfileDataDto> {
+        return try {
+            when (val response = artistService.getArtistProfileData(artistName)) {
+                is ArtistProfileDataDto -> ResponseEntity.ok(response)
+                else -> ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to fetch artist" }
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
+
     @GetMapping("/name")
     fun getArtistsByName(
         @RequestParam artistName: String,
@@ -42,6 +58,20 @@ class ArtistResource(
             }
         } catch (e: Exception) {
             logger.error(e) { "Failed to fetch artist" }
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
+
+    @GetMapping("/artists")
+    fun getArtistsByInput(
+        @RequestParam artistName: String,
+    ): ResponseEntity<List<String>> {
+        return try {
+            return ResponseEntity.ok(
+                artistService.findSpotifyArtistNamesByName(artistName)
+            )
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to fetch artists" }
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
         }
     }

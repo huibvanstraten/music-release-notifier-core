@@ -1,5 +1,6 @@
 package com.hvs.kotlinspringplayground.user.autoconfigure
 
+import com.hvs.kotlinspringplayground.artist.service.ArtistService
 import com.hvs.kotlinspringplayground.user.service.impl.UserService
 import com.hvs.kotlinspringplayground.user.repository.UserRepository
 import org.springframework.boot.autoconfigure.domain.EntityScan
@@ -15,7 +16,9 @@ class UserAutoConfiguration {
     @Bean
     fun userService(
         userRepository: UserRepository,
+        artistService: ArtistService,
     ): UserService = UserService(
         userRepository = userRepository,
+        artistService = artistService,
     )
 }

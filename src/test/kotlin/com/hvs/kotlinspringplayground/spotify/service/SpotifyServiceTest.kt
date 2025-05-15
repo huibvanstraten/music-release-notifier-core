@@ -57,7 +57,7 @@ class SpotifyServiceTest {
             // GIVEN
             val artistName = "Test Artist 1"
 
-            whenever(spotifyClient.findArtistByName(eq(artistName))).thenReturn(spotifyArtistSearchResponse())
+            whenever(spotifyClient.findArtistNamesByName(eq(artistName))).thenReturn(spotifyArtistSearchResponse())
 
             // WHEN
             val result = spotifyService.getArtistByName(artistName)
@@ -73,7 +73,7 @@ class SpotifyServiceTest {
             // GIVEN
             val artistName = "NonExistent"
             val spotifyResponse = spotifyArtistSearchResponse()
-            whenever(spotifyClient.findArtistByName(eq(artistName))).thenReturn(spotifyResponse)
+            whenever(spotifyClient.findArtistNamesByName(eq(artistName))).thenReturn(spotifyResponse)
 
             // WHEN
             val result = spotifyService.getArtistByName(artistName)
@@ -87,7 +87,7 @@ class SpotifyServiceTest {
             // GIVEN
             val artistName = "WeirdCase"
             val incompleteResponse = SpotifyArtistSearchResponse(artists = null)
-            whenever(spotifyClient.findArtistByName(eq(artistName))).thenReturn(incompleteResponse)
+            whenever(spotifyClient.findArtistNamesByName(eq(artistName))).thenReturn(incompleteResponse)
 
             // WHEN
             val result = spotifyService.getArtistByName(artistName)

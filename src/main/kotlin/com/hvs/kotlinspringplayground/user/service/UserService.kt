@@ -1,10 +1,11 @@
 package com.hvs.kotlinspringplayground.user.service
 
-import com.hvs.kotlinspringplayground.user.dto.UserDataDto
+import com.hvs.kotlinspringplayground.user.dto.UserArtistDto
+import com.hvs.kotlinspringplayground.user.dto.UserArtistListDto
 
 interface UserService {
 
-    fun getUsers(): List<UserDataDto>
+    fun getUsers(): List<UserArtistListDto>
 
     fun getTotalUsers(): Long
 
@@ -12,5 +13,11 @@ interface UserService {
 
     fun getArtistIdListForUser(username: String): List<String>?
 
-    fun storeArtistListForUser(userDto: UserDataDto)
+    fun getArtistNameListForUser(username: String): List<String>?
+
+    fun storeArtistListForUser(userDto: UserArtistListDto)
+
+    fun storeArtistForUser(user: UserArtistDto)
+
+    fun removeArtistForUser(username: String, artistname: String)
 }

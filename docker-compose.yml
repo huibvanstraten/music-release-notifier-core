@@ -16,7 +16,7 @@ services:
             - RABBITMQ_ROUTING_KEY=release_routing_key
             - CORS_ALLOWED_ORIGINS=http://localhost:4200
         ports:
-          - "8080:80"
+          - "7070:80"
         networks:
             - local_network
         depends_on:
