@@ -86,7 +86,7 @@ class SpotifyClientTest {
         )
 
         // Act
-        val response: SpotifyArtistSearchResponse = spotifyClient.findArtistByName("Artist Name")
+        val response: SpotifyArtistSearchResponse = spotifyClient.findArtistNamesByName("Artist Name")
 
         // Assert
         val items = response.artists?.items

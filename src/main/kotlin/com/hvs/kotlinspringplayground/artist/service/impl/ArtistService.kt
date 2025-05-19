@@ -2,6 +2,7 @@ package com.hvs.kotlinspringplayground.artist.service.impl
 
 import com.hvs.kotlinspringplayground.artist.domain.jpa.Artist
 import com.hvs.kotlinspringplayground.artist.dto.ArtistDataDto
+import com.hvs.kotlinspringplayground.artist.dto.ArtistProfileDataDto
 import com.hvs.kotlinspringplayground.artist.repository.ArtistRepository
 import com.hvs.kotlinspringplayground.artist.service.ArtistService
 import com.hvs.kotlinspringplayground.outbox.service.OutboxService
@@ -24,6 +25,10 @@ open class ArtistService(
         artistId: String,
         ): ArtistDataDto = spotifyService.getArtist(artistId)
 
+    override fun getArtistProfileData(
+        artistName: String,
+        ): ArtistProfileDataDto? = spotifyService.getArtistProfileData(artistName)
+
 
     @Transactional
     override fun getArtistFromSpotifyByName(
@@ -36,6 +41,10 @@ open class ArtistService(
 //            )
 //        }
     }
+
+    override fun findSpotifyArtistNamesByName(
+        input: String
+    ): List<String> = spotifyService.getArtistNamesByName(input)
 
     override fun storeArtists() {
         val artistDataResponse = tidalService.getAllArtists()

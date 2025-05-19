@@ -3,7 +3,7 @@ package com.hvs.kotlinspringplayground.user.domain.jpa
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.hvs.kotlinspringplayground.user.dto.UserDataDto
+import com.hvs.kotlinspringplayground.user.dto.UserArtistListDto
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -26,7 +26,7 @@ data class User(
 ) {
 
     companion object {
-        fun from(userData: UserDataDto): User = with(userData) {
+        fun from(userData: UserArtistListDto): User = with(userData) {
             User(
                 id = this.userId,
                 username = this.username,
