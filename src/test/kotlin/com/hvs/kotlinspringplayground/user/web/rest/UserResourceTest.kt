@@ -1,7 +1,8 @@
 package com.hvs.kotlinspringplayground.user.web.rest
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
-import com.hvs.kotlinspringplayground.user.dto.UserDataDto
+import com.hvs.kotlinspringplayground.artist.service.ArtistService
+import com.hvs.kotlinspringplayground.user.dto.UserArtistListDto
 import com.hvs.kotlinspringplayground.user.service.ID
 import com.hvs.kotlinspringplayground.user.service.USERNAME_1
 import com.hvs.kotlinspringplayground.user.service.impl.UserService
@@ -112,7 +113,7 @@ class UserResourceTest {
     @Test
     fun `saveArtistsForUser returns OK when userService completes successfully`() {
         // GIVEN
-        val dto = UserDataDto(userId = ID, username = "TestUser", artistIdList = listOf("artist1", "artist2"))
+        val dto = UserArtistListDto(userId = ID, username = "TestUser", artistIdList = listOf("artist1", "artist2"))
 
 
         // WHEN
@@ -126,7 +127,7 @@ class UserResourceTest {
     @Test
     fun `saveArtistsForUser returns INTERNAL_SERVER_ERROR when userService throws`() {
         // GIVEN
-        val dto = UserDataDto(userId = ID, username = "TestUser", artistIdList = listOf("artist1", "artist2"))
+        val dto = UserArtistListDto(userId = ID, username = "TestUser", artistIdList = listOf("artist1", "artist2"))
         doThrow(RuntimeException("Failed to store artists")).whenever(userService)
             .storeArtistListForUser(dto)
 
@@ -139,12 +140,12 @@ class UserResourceTest {
     }
 
     private fun userList() = listOf(
-        UserDataDto(
+        UserArtistListDto(
             userId = ID,
             username = "testUser1",
             artistIdList = listOf("testId1", "testId2")
         ),
-        UserDataDto(
+        UserArtistListDto(
             userId = ID,
             username = "testUser2",
             artistIdList = listOf("testId1", "testId2")

@@ -1,6 +1,7 @@
 package com.hvs.kotlinspringplayground.spotify.service
 
 import com.hvs.kotlinspringplayground.artist.dto.ArtistDataDto
+import com.hvs.kotlinspringplayground.artist.dto.ArtistProfileDataDto
 import com.hvs.kotlinspringplayground.spotify.client.impl.SpotifyAsyncClient
 import com.hvs.kotlinspringplayground.spotify.client.impl.SpotifyClient
 import com.hvs.kotlinspringplayground.spotify.client.response.Album
@@ -21,10 +22,32 @@ class SpotifyService(
         )
     }
 
+    fun getArtistProfileData(
+        artistName: String,
+    ): ArtistProfileDataDto? {
+        val artistId = spotifyClient.findArtistNamesByName(artistName).artists?.items?.first()?.id ?: return null
+        return spotifyClient.getArtist(artistId).run {
+            ArtistProfileDataDto(
+                name = name,
+                artistId = artistId,
+                genres = genres,
+                image = with(images.first()) {
+                    ArtistProfileDataDto.SpotifyImage(
+                        url = this.url,
+                        height = this.height,
+                        width = this.width
+                    )
+                },
+                spotifyLink = externalUrls.spotify,
+            )
+
+        }
+    }
+
     fun getArtistByName(
         artistName: String
     ): ArtistDataDto? {
-        val searchResult = spotifyClient.findArtistByName(artistName)
+        val searchResult = spotifyClient.findArtistNamesByName(artistName)
         if (searchResult.artists == null || searchResult.artists.items == null) return null
 
         return searchResult.artists.items.firstOrNull { it.name.equals(artistName, ignoreCase = true) }?.let {
@@ -33,6 +56,15 @@ class SpotifyService(
                 artistId = it.id
             )
         }
+    }
+
+    fun getArtistNamesByName(
+        artistName: String
+    ): List<String> {
+        val searchResult = spotifyClient.findArtistNamesByName(artistName)
+        return searchResult.artists?.items?.map {
+            it.name
+        } ?: emptyList()
     }
 
     fun getReleasesForArtist(

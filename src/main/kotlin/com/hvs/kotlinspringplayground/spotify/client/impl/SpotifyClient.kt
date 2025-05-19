@@ -23,7 +23,7 @@ class SpotifyClient(
         return response?: throw RuntimeException("Failed to retrieve artist data for artist: $artistId")
     }
 
-    fun findArtistByName(
+    fun findArtistNamesByName(
         artistName: String
     ): SpotifyArtistSearchResponse {
         val response = restClient

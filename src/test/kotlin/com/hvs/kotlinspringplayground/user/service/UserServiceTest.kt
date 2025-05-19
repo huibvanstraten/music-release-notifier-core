@@ -2,8 +2,9 @@ package com.hvs.kotlinspringplayground.user.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.hvs.kotlinspringplayground.artist.service.ArtistService
 import com.hvs.kotlinspringplayground.user.domain.jpa.User
-import com.hvs.kotlinspringplayground.user.dto.UserDataDto
+import com.hvs.kotlinspringplayground.user.dto.UserArtistListDto
 import com.hvs.kotlinspringplayground.user.repository.UserRepository
 import com.hvs.kotlinspringplayground.user.service.impl.UserService
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,6 +30,9 @@ class UserServiceTest {
 
     @Mock
     private lateinit var userRepository: UserRepository
+
+    @Mock
+    private lateinit var artistService: ArtistService
 
     @InjectMocks
     private lateinit var userService: UserService
@@ -144,7 +148,7 @@ class UserServiceTest {
         }.whenever(userRepository).save(any<User>())
 
         // WHEN
-        userService.storeArtistListForUser(UserDataDto(userId = ID, username = USERNAME_1, artistIdList = listOf("testId1", "testId2") ))
+        userService.storeArtistListForUser(UserArtistListDto(userId = ID, username = USERNAME_1, artistIdList = listOf("testId1", "testId2") ))
 
         // THEN
 
