@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - build-image
   - push
   # - package
   # - deploy
@@ -10,7 +11,11 @@ image: gradle:jdk21
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
   ACR_URL: "crmrntest.azurecr.io"
+  
+  DOCKER_HUB_USER: $mrn
+
   AZURE_RESOURCE_GROUP: "project-huib"
   AZURE_AKS_CLUSTER: "aks-mrn-test"
   AZURE_SUBSCRIPTION_ID: $mrn_settings_azure_subscription_id
@@ -50,6 +55,20 @@ test:
       - build
       - .gradle
 
+build_image_dockerhub:
+  stage: build-image
+  image: docker:stable
+  services:
+      - docker:dind
+  variables:
+    DOCKER_IMAGE: "music-release-notifier-core"
+  before_script:
+    - docker login - u $DOCKER_HUB_USER -p $DOCKER_HUB_PW
+  script:
+    - docker build -t $DOCKER_IMAGE:$CI_PIPELINE_IID .
+    - docker image tag $DOCKER_IMAGE:$CI_PIPELINE_IID $DOCKER_HUB_USER/$DOCKER_IMAGE:$CI_PIPELINE_IID
+    - docker push $DOCKER_HUB_USER/$DOCKER_IMAGE:$CI_PIPELINE_IID
+
 push_core_image:
   stage: push
   image: docker:stable
@@ -69,6 +88,7 @@ push_keycloak_image:
   services:
       - docker:dind
   variables:
+    DOCKER_TLS_CERTDIR: "/certs"
     DOCKER_IMAGE: "mrnkeycloak"
   script:
     - docker build -t $DOCKER_IMAGE:$CI_PIPELINE_IID .
