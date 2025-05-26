@@ -6,21 +6,10 @@ spring:
     name: music-release-notifier-core
   security:
     oauth2:
-      client:
-#        registration:
-#          keycloak:
-#            client-id: music-release-notifier-client-credentials
-#            client-secret:
-#            scope:
-#              - profile
-#              - openid
-#              - email
       resourceserver:
         jwt:
-          jwk-set-uri: ${KEYCLOAK:http://localhost:7080/realms/music-release-notifier/protocol/openid-connect/certs}
-
-
-
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:7080/realms/music-release-notifier/protocol/openid-connect/certs}
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:7080/realms/music-release-notifier}
 
   rabbitmq:
     publisher-confirm-type: correlated
