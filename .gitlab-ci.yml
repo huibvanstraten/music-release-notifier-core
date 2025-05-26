@@ -1,10 +1,15 @@
 stages:
+  - build
+  - test
   - push
   # - package
   # - deploy
   # - rollback
 
+image: gradle:jdk21
+
 variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   ACR_URL: "crmrntest.azurecr.io"
   AZURE_RESOURCE_GROUP: "project-huib"
   AZURE_AKS_CLUSTER: "aks-mrn-test"
@@ -12,6 +17,34 @@ variables:
   AZURE_CLIENT_ID: $mrn_settings_azure_service_principal_app_id
   AZURE_CLIENT_SECRET: $mrn_settings_azure_service_principal_app_password
   AZURE_TENANT_ID: $mrn_settings_azure_tenant_id
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+cache:
+  paths:
+      - .gradle/wrapper
+      - .gradle/caches
+
+build:
+  stage: build
+  script: ./gradlew --build-cache assemble
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
+
+test:
+  stage: test
+  script: ./gradlew check
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
 
 push_core_image:
   stage: push
