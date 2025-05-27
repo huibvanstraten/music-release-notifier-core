@@ -101,10 +101,7 @@ build_and_publish:
 
   script:
     # 1) build once (add any --build-arg you need)
-    - docker build \
-      --build-arg NAME="Cloud Run" \
-      -t $IMAGE_NAME:$IMAGE_TAG \
-      .
+    - docker build --build-arg NAME="Cloud Run" -t "$IMAGE_NAME:$IMAGE_TAG" .
 
     # 2) tag for Docker Hub & GCR
     - docker tag $IMAGE_NAME:$IMAGE_TAG $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
