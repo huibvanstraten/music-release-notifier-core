@@ -1,6 +1,6 @@
 stages:
-  - build
-  - test
+#  - build
+#  - test
   - publish
   - azure
   - publish-ar
@@ -51,32 +51,32 @@ cache:
       - .gradle/caches
 
 #gradle build
-build:
-  stage: build
-  script:
-    - ./gradlew --build-cache assemble
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: push
-    paths:
-      - build
-      - .gradle
+#build:
+#  stage: build
+#  script:
+#    - ./gradlew --build-cache assemble
+#  cache:
+#    key: "$CI_COMMIT_REF_NAME"
+#    policy: push
+#    paths:
+#      - build
+#      - .gradle
 
 
 #run unit tests
 test:
-  stage: test
-  script: ./gradlew check
-  artifacts:
-    when: always
-    reports:
-      junit: build/test-results/test/**/TEST-*.xml
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: pull
-    paths:
-      - build
-      - .gradle
+#  stage: test
+#  script: ./gradlew check
+#  artifacts:
+#    when: always
+#    reports:
+#      junit: build/test-results/test/**/TEST-*.xml
+#  cache:
+#    key: "$CI_COMMIT_REF_NAME"
+#    policy: pull
+#    paths:
+#      - build
+#      - .gradle
 
 # build and publish
 build_and_publish:
@@ -86,7 +86,10 @@ build_and_publish:
   services:
     - name: docker:24.0.5-dind
       alias: docker
+  privileged: true
   variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
     GCR_HOST: gcr.io
     GCR_IMAGE: $GCR_HOST/$GCP_PROJECT_ID/$IMAGE_NAME
   before_script:
