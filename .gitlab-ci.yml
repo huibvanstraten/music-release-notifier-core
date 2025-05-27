@@ -1,48 +1,41 @@
+image: google/cloud-sdk:slim
+
+services:
+  - name: docker:24.0.5-dind
+    alias: docker
+
+variables:
+  # Docker-in-Docker config
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+
+  # Builds
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  ACR_URL: "crmrntest.azurecr.io"
+
+  # Container naming
+  SERVICE_NAME: "music-release-notifier"
+  IMAGE_NAME: "music-release-notifier-core"
+  IMAGE_TAG: "v$CI_PIPELINE_ID"
+
+  # Google Artifact Registry
+  GCR_HOST: "gcr.io"
+  GCR_IMAGE: "$GCR_HOST/$GCP_PROJECT_ID/$IMAGE_NAME"
+  AR_IMAGE: "$LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$ARTIFACT_REPO/$IMAGE_NAME"
+
 stages:
   - build
   - test
   - publish
-  - azure
   - publish-ar
   - deploy
-
-variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-  ACR_URL: "crmrntest.azurecr.io"
-  SERVICE_NAME: "music-release-notifier"
-  IMAGE_NAME: "music-release-notifier-core"
-  IMAGE_TAG: "v$CI_PIPELINE_ID"
-  AR_IMAGE: "$LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$ARTIFACT_REPO/$IMAGE_NAME"
-
-include:
-  # 1) Upload to Artifact Registry 1
-  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@0.1.0
-    inputs:
-      stage: publish-ar
-      source: $GCR_IMAGE:$IMAGE_TAG
-      target: $AR_IMAGE:$IMAGE_TAG
-
-  # 2) Deploy to Cloud Run
-  - component: gitlab.com/google-gitlab-components/cloud-run/deploy-cloud-run@0.1.0
-    inputs:
-      stage: deploy
-      image: $AR_IMAGE:$IMAGE_TAG
-      project_id: $GCP_PROJECT_ID
-      region: $LOCATION
-      service: $SERVICE_NAME
-
-# Java image
-image: gradle:jdk21
-before_script:
-  - export GRADLE_USER_HOME=`pwd`/.gradle
-cache:
-  paths:
-      - .gradle/wrapper
-      - .gradle/caches
 
 #gradle build
 build:
   stage: build
+  image: gradle:jdk21
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
     - ./gradlew --build-cache assemble
   cache:
@@ -52,11 +45,14 @@ build:
       - build
       - .gradle
 
-
-#run unit tests
+# Unit tests
 test:
   stage: test
-  script: ./gradlew check
+  image: gradle:jdk21
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+  script:
+    - ./gradlew check
   artifacts:
     when: always
     reports:
@@ -71,16 +67,6 @@ test:
 # build and publish
 build_and_publish:
   stage: publish
-  # google/cloud-sdk includes gcloud + docker CLI
-  image: google/cloud-sdk:slim
-  services:
-    - name: docker:24.0.5-dind
-      alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-    GCR_HOST: gcr.io
-    GCR_IMAGE: $GCR_HOST/$GCP_PROJECT_ID/$IMAGE_NAME
   before_script:
     # — Docker Hub login
     - echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
@@ -102,3 +88,20 @@ build_and_publish:
     # 3) push both
     - docker push $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
     - docker push $GCR_IMAGE:$IMAGE_TAG
+
+include:
+  # 1) Upload to Artifact Registry 1
+  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@0.1.0
+    inputs:
+      stage: publish-ar
+      source: $GCR_IMAGE:$IMAGE_TAG
+      target: $AR_IMAGE:$IMAGE_TAG
+
+  # 2) Deploy to Cloud Run
+  - component: gitlab.com/google-gitlab-components/cloud-run/deploy-cloud-run@0.1.0
+    inputs:
+      stage: deploy
+      image: $AR_IMAGE:$IMAGE_TAG
+      project_id: $GCP_PROJECT_ID
+      region: $LOCATION
+      service: $SERVICE_NAME
