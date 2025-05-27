@@ -11,7 +11,6 @@ variables:
 
   # Builds
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-  ACR_URL: "crmrntest.azurecr.io"
 
   # Container naming
   SERVICE_NAME: "music-release-notifier"
@@ -22,6 +21,13 @@ variables:
   GCR_HOST: "gcr.io"
   GCR_IMAGE: "$GCR_HOST/$GCP_PROJECT_ID/$IMAGE_NAME"
   AR_IMAGE: "$LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$ARTIFACT_REPO/$IMAGE_NAME"
+
+before_script:
+  # — Authenticeer gcloud en configureer Docker voor GCR
+  - echo "$GCP_SERVICE_KEY" | base64 -d > /tmp/gcp-key.json
+  - gcloud auth activate-service-account --key-file /tmp/gcp-key.json
+  - gcloud config set project "$GCP_PROJECT_ID"
+  - gcloud auth configure-docker --quiet
 
 stages:
   - build
@@ -70,13 +76,6 @@ build_and_publish:
   before_script:
     # — Docker Hub login
     - echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
-
-    # — GCR login via gcloud
-    - echo "$GCP_SERVICE_KEY" | base64 -d > /tmp/gcp-key.json
-    - gcloud auth activate-service-account --key-file /tmp/gcp-key.json
-    - gcloud config set project $GCP_PROJECT_ID
-    - gcloud auth configure-docker --quiet
-
   script:
     # 1) build once (add any --build-arg you need)
     - docker build --build-arg NAME="Cloud Run" -t "$IMAGE_NAME:$IMAGE_TAG" .
