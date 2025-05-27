@@ -1,20 +1,21 @@
 stages:
   - build
   - test
-  - build-image
-  - push
-  # - package
-  # - deploy
-  # - rollback
-
-image: gradle:jdk21
+  - publish
+  - azure
+  - publish-ar
+  - deploy
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
   ACR_URL: "crmrntest.azurecr.io"
-  
-  DOCKER_HUB_USER: $mrn
+
+  SERVICE_NAME: "music-release-notifier"
+  IMAGE_NAME: "music-release-notifier-core"
+  IMAGE_TAG: "v$CI_PIPELINE_ID"
+
+  AR_IMAGE: "$LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$ARTIFACT_REPO/$IMAGE_NAME"
 
   AZURE_RESOURCE_GROUP: "project-huib"
   AZURE_AKS_CLUSTER: "aks-mrn-test"
@@ -23,17 +24,37 @@ variables:
   AZURE_CLIENT_SECRET: $mrn_settings_azure_service_principal_app_password
   AZURE_TENANT_ID: $mrn_settings_azure_tenant_id
 
+include:
+  # 1) Upload to Artifact Registry
+  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@0.1.0
+    inputs:
+      stage: publish-ar
+      source: $GCR_IMAGE:$IMAGE_TAG
+      target: $AR_IMAGE:$IMAGE_TAG
+
+  # 2) Deploy to Cloud Run
+  - component: gitlab.com/google-gitlab-components/cloud-run/deploy-cloud-run@0.1.0
+    inputs:
+      stage: deploy
+      image: $AR_IMAGE:$IMAGE_TAG
+      project_id: $GCP_PROJECT_ID
+      region: $LOCATION
+      service: $SERVICE_NAME
+
+# Java image
+image: gradle:jdk21
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
-
 cache:
   paths:
       - .gradle/wrapper
       - .gradle/caches
 
+#gradle build
 build:
   stage: build
-  script: ./gradlew --build-cache assemble
+  script:
+    - ./gradlew --build-cache assemble
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
@@ -41,6 +62,8 @@ build:
       - build
       - .gradle
 
+
+#run unit tests
 test:
   stage: test
   script: ./gradlew check
@@ -55,22 +78,46 @@ test:
       - build
       - .gradle
 
-build_image_dockerhub:
-  stage: build-image
-  image: docker:stable
+# build and publish
+build_and_publish:
+  stage: publish
+  # google/cloud-sdk includes gcloud + docker CLI
+  image: google/cloud-sdk:slim
   services:
-      - docker:dind
+    - name: docker:24.0.5-dind
+      alias: docker
   variables:
-    DOCKER_IMAGE: "music-release-notifier-core"
+    GCR_HOST: gcr.io
+    GCR_IMAGE: $GCR_HOST/$GCP_PROJECT_ID/$IMAGE_NAME
   before_script:
-    - docker login - u $DOCKER_HUB_USER -p $DOCKER_HUB_PW
-  script:
-    - docker build -t $DOCKER_IMAGE:$CI_PIPELINE_IID .
-    - docker image tag $DOCKER_IMAGE:$CI_PIPELINE_IID $DOCKER_HUB_USER/$DOCKER_IMAGE:$CI_PIPELINE_IID
-    - docker push $DOCKER_HUB_USER/$DOCKER_IMAGE:$CI_PIPELINE_IID
+    # — Docker Hub login
+    - echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
 
+    # — GCR login via gcloud
+    - echo "$GCP_SERVICE_KEY" | base64 -d > /tmp/gcp-key.json
+    - gcloud auth activate-service-account --key-file /tmp/gcp-key.json
+    - gcloud config set project $GCP_PROJECT_ID
+    - gcloud auth configure-docker --quiet
+
+  script:
+    # 1) build once (add any --build-arg you need)
+    - docker build \
+      --build-arg NAME="Cloud Run" \
+      -t $IMAGE_NAME:$IMAGE_TAG \
+      .
+
+    # 2) tag for Docker Hub & GCR
+    - docker tag $IMAGE_NAME:$IMAGE_TAG $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
+    - docker tag $IMAGE_NAME:$IMAGE_TAG $GCR_IMAGE:$IMAGE_TAG
+
+    # 3) push both
+    - docker push $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
+    - docker push $GCR_IMAGE:$IMAGE_TAG
+
+
+# build MRN image and push to Azure
 push_core_image:
-  stage: push
+  stage: azure
   image: docker:stable
   services:
       - docker:dind
@@ -82,13 +129,14 @@ push_core_image:
     - docker login $ACR_URL -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET
     - docker image push $ACR_URL/$DOCKER_IMAGE:$CI_PIPELINE_IID
 
+
+# build keycloak image and push to Azure
 push_keycloak_image:
-  stage: push
+  stage: azure
   image: docker:stable
   services:
       - docker:dind
   variables:
-    DOCKER_TLS_CERTDIR: "/certs"
     DOCKER_IMAGE: "mrnkeycloak"
   script:
     - docker build -t $DOCKER_IMAGE:$CI_PIPELINE_IID .
