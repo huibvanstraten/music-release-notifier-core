@@ -25,7 +25,7 @@ variables:
   AZURE_TENANT_ID: $mrn_settings_azure_tenant_id
 
 include:
-  # 1) Upload to Artifact Registry 1
+  # 1) Upload to Artifact Registry
   - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@0.1.0
     inputs:
       stage: publish-ar
