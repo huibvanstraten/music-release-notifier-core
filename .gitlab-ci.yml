@@ -8,21 +8,11 @@ stages:
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-
   ACR_URL: "crmrntest.azurecr.io"
-
   SERVICE_NAME: "music-release-notifier"
   IMAGE_NAME: "music-release-notifier-core"
   IMAGE_TAG: "v$CI_PIPELINE_ID"
-
   AR_IMAGE: "$LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$ARTIFACT_REPO/$IMAGE_NAME"
-
-  AZURE_RESOURCE_GROUP: "project-huib"
-  AZURE_AKS_CLUSTER: "aks-mrn-test"
-  AZURE_SUBSCRIPTION_ID: $mrn_settings_azure_subscription_id
-  AZURE_CLIENT_ID: $mrn_settings_azure_service_principal_app_idg
-  AZURE_CLIENT_SECRET: $mrn_settings_azure_service_principal_app_password
-  AZURE_TENANT_ID: $mrn_settings_azure_tenant_id
 
 include:
   # 1) Upload to Artifact Registry 1
@@ -112,33 +102,3 @@ build_and_publish:
     # 3) push both
     - docker push $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
     - docker push $GCR_IMAGE:$IMAGE_TAG
-
-
-# build MRN image and push to Azure
-push_core_image:
-  stage: azure
-  image: docker:stable
-  services:
-      - docker:dind
-  variables:
-    DOCKER_IMAGE: "mrncore"
-  script:
-    - docker build -t $DOCKER_IMAGE:$CI_PIPELINE_IID .
-    - docker image tag $DOCKER_IMAGE:$CI_PIPELINE_IID $ACR_URL/$DOCKER_IMAGE:$CI_PIPELINE_IID
-    - docker login $ACR_URL -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET
-    - docker image push $ACR_URL/$DOCKER_IMAGE:$CI_PIPELINE_IID
-
-
-# build keycloak image and push to Azure
-push_keycloak_image:
-  stage: azure
-  image: docker:stable
-  services:
-      - docker:dind
-  variables:
-    DOCKER_IMAGE: "mrnkeycloak"
-  script:
-    - docker build -t $DOCKER_IMAGE:$CI_PIPELINE_IID .
-    - docker image tag $DOCKER_IMAGE:$CI_PIPELINE_IID $ACR_URL/$DOCKER_IMAGE:$CI_PIPELINE_IID
-    - docker login $ACR_URL -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET
-    - docker image push $ACR_URL/$DOCKER_IMAGE:$CI_PIPELINE_IID
