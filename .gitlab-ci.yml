@@ -18,7 +18,6 @@ variables:
   IMAGE_TAG: "v$CI_PIPELINE_ID"
 
   # Google Artifact Registry
-  GCR_IMAGE: "$ARCHIFACT_REPO/$GCP_PROJECT_ID/$IMAGE_NAME"
   AR_HOST: "$LOCATION-docker.pkg.dev"
   AR_IMAGE: "$AR_HOST/$GCP_PROJECT_ID/$ARTIFACT_REPO/$IMAGE_NAME"
 
@@ -69,11 +68,10 @@ build_and_publish:
     # — Docker Hub login
     - echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
 
-    # — GCR login via gcloud
+    # — GCP login
     - echo "$GCP_SERVICE_KEY" | base64 -d > /tmp/gcp-key.json
     - gcloud auth activate-service-account --key-file /tmp/gcp-key.json
     - gcloud config set project $GCP_PROJECT_ID
-    - gcloud auth configure-docker --quiet gcr.io "$AR_HOST"
 
     # Login to Artifact Registry via OAuth token
     - gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin "https://$AR_HOST"
@@ -88,7 +86,7 @@ build_and_publish:
 
     # 3) tag and push GCP
     - docker tag $IMAGE_NAME:$IMAGE_TAG $AR_IMAGE:$IMAGE_TAG
-    - docker push $GCR_IMAGE:$IMAGE_TAG
+    - docker push "$AR_IMAGE:$IMAGE_TAG"
 
 
 # Deploy to Cloud Run
