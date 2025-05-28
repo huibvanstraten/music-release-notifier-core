@@ -19,7 +19,7 @@ variables:
 
   # Google Artifact Registry
   AR_HOST: "$LOCATION-docker.pkg.dev"
-  AR_IMAGE: "$AR_HOST/$GCP_PROJECT_ID/$ARTIFACT_REPO/$IMAGE_NAME"
+  AR_IMAGE: "$AR_HOST/$GCP_PROJECT_ID/$ARTIFACT_REPO"
 
 stages:
   - build
@@ -85,22 +85,17 @@ build_and_publish:
     - docker push $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
 
     # 3) tag and push GCP
-    - docker tag $IMAGE_NAME:$IMAGE_TAG $AR_IMAGE:$IMAGE_TAG
-    - docker push "$AR_IMAGE:$IMAGE_TAG"
+    - docker tag $IMAGE_NAME:$IMAGE_TAG $AR_IMAGE/$IMAGE_NAME:$IMAGE_TAG
+    - docker push $AR_IMAGE/$IMAGE_NAME":$IMAGE_TAG
 
 
 # Deploy to Cloud Run
 deploy:
   stage: deploy
-  image: google/cloud-sdk:slim
   before_script:
     # Authenticate gcloud
     - echo "$GCP_SERVICE_KEY" | base64 -d > /tmp/gcp-key.json
     - gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
     - gcloud config set project "$GCP_PROJECT_ID"
   script:
-    - gcloud run deploy "$SERVICE_NAME" \
-      --image "$AR_IMAGE:$IMAGE_TAG" \
-      --region "$LOCATION" \
-      --platform managed \
-      --quiet
+    - gcloud run deploy "$SERVICE_NAME" --image "$AR_IMAGE/$IMAGE_NAME:$IMAGE_TAG" --region "$LOCATION" --platform managed --quiet
