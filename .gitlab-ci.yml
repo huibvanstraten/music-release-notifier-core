@@ -86,7 +86,7 @@ build_and_publish:
 
     # 3) tag and push GCP
     - docker tag $IMAGE_NAME:$IMAGE_TAG $AR_IMAGE/$IMAGE_NAME:$IMAGE_TAG
-    - docker push $AR_IMAGE/$IMAGE_NAME":$IMAGE_TAG
+    - docker push $AR_IMAGE/$IMAGE_NAME:$IMAGE_TAG
 
 
 # Deploy to Cloud Run
