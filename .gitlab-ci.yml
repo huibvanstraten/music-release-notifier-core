@@ -18,22 +18,14 @@ variables:
   IMAGE_TAG: "v$CI_PIPELINE_ID"
 
   # Google Artifact Registry
-  GCR_HOST: "gcr.io"
-  GCR_IMAGE: "$GCR_HOST/$GCP_PROJECT_ID/$IMAGE_NAME"
-  AR_IMAGE: "$LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$ARTIFACT_REPO/$IMAGE_NAME"
-
-before_script:
-  # — Authenticeer gcloud en configureer Docker voor GCR
-  - echo "$GCP_SERVICE_KEY" | base64 -d > /tmp/gcp-key.json
-  - gcloud auth activate-service-account --key-file /tmp/gcp-key.json
-  - gcloud config set project "$GCP_PROJECT_ID"
-  - gcloud auth configure-docker --quiet
+  GCR_IMAGE: "$ARCHIFACT_REPO/$GCP_PROJECT_ID/$IMAGE_NAME"
+  AR_HOST: "$LOCATION-docker.pkg.dev"
+  AR_IMAGE: "$AR_HOST/$GCP_PROJECT_ID/$ARTIFACT_REPO/$IMAGE_NAME"
 
 stages:
   - build
   - test
   - publish
-  - publish-ar
   - deploy
 
 #gradle build
@@ -70,37 +62,47 @@ test:
       - build
       - .gradle
 
-# build and publish
+# build and publish (Docker Hub and GCP AR)
 build_and_publish:
   stage: publish
   before_script:
     # — Docker Hub login
     - echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+
+    # — GCR login via gcloud
+    - echo "$GCP_SERVICE_KEY" | base64 -d > /tmp/gcp-key.json
+    - gcloud auth activate-service-account --key-file /tmp/gcp-key.json
+    - gcloud config set project $GCP_PROJECT_ID
+    - gcloud auth configure-docker --quiet gcr.io "$AR_HOST"
+
+    # Login to Artifact Registry via OAuth token
+    - gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin "https://$AR_HOST"
+
   script:
     # 1) build once (add any --build-arg you need)
     - docker build --build-arg NAME="Cloud Run" -t "$IMAGE_NAME:$IMAGE_TAG" .
 
-    # 2) tag for Docker Hub & GCR
+    # 2) tag and push Docker
     - docker tag $IMAGE_NAME:$IMAGE_TAG $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
-    - docker tag $IMAGE_NAME:$IMAGE_TAG $GCR_IMAGE:$IMAGE_TAG
-
-    # 3) push both
     - docker push $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
+
+    # 3) tag and push GCP
+    - docker tag $IMAGE_NAME:$IMAGE_TAG $AR_IMAGE:$IMAGE_TAG
     - docker push $GCR_IMAGE:$IMAGE_TAG
 
-include:
-  # 1) Upload to Artifact Registry 1
-  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@0.1.0
-    inputs:
-      stage: publish-ar
-      source: $GCR_IMAGE:$IMAGE_TAG
-      target: $AR_IMAGE:$IMAGE_TAG
 
-  # 2) Deploy to Cloud Run
-  - component: gitlab.com/google-gitlab-components/cloud-run/deploy-cloud-run@0.1.0
-    inputs:
-      stage: deploy
-      image: $AR_IMAGE:$IMAGE_TAG
-      project_id: $GCP_PROJECT_ID
-      region: $LOCATION
-      service: $SERVICE_NAME
+# Deploy to Cloud Run
+deploy:
+  stage: deploy
+  image: google/cloud-sdk:slim
+  before_script:
+    # Authenticate gcloud
+    - echo "$GCP_SERVICE_KEY" | base64 -d > /tmp/gcp-key.json
+    - gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
+    - gcloud config set project "$GCP_PROJECT_ID"
+  script:
+    - gcloud run deploy "$SERVICE_NAME" \
+      --image "$AR_IMAGE:$IMAGE_TAG" \
+      --region "$LOCATION" \
+      --platform managed \
+      --quiet
