@@ -5,7 +5,7 @@ import org.springframework.boot.runApplication
 import org.springframework.context.annotation.ComponentScan
 
 @SpringBootApplication
-@ComponentScan("com.hvs.outbox")
+@ComponentScan("com.hvs.outbox", "com.hvs.kotlinspringplayground")
 class KotlinSpringPlaygroundApplication
 
 fun main(args: Array<String>) {

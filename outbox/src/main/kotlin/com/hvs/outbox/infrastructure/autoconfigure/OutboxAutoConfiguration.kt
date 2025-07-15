@@ -40,7 +40,7 @@ class OutboxAutoConfiguration {
     fun camundaOutboxService(
         outboxRepository: OutboxRepository,
         @Value("\${outbox.publisher.cloudevent-source}") cloudEventSource: String,
-        ): OutboxService = CamundaOutboxService(
+        ): CamundaOutboxService = CamundaOutboxService(
         outboxRepository = outboxRepository,
         cloudEventSource = cloudEventSource
     )
