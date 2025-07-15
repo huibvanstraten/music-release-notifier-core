@@ -2,9 +2,9 @@ package com.hvs.kotlinspringplayground.artist.service.impl
 
 import com.hvs.kotlinspringplayground.artist.dto.ArtistDataDto
 import com.hvs.kotlinspringplayground.artist.repository.ArtistRepository
-import com.hvs.kotlinspringplayground.outbox.service.OutboxService
 import com.hvs.kotlinspringplayground.spotify.service.SpotifyService
 import com.hvs.kotlinspringplayground.tidal.service.TidalService
+import com.hvs.outbox.application.usecase.OutboxService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

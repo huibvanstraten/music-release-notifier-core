@@ -38,13 +38,6 @@ java {
     }
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_21)
@@ -67,6 +60,10 @@ repositories {
 }
 
 dependencies {
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    implementation(project(":outbox"))
+
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-rest")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -95,14 +92,6 @@ dependencies {
 
     // LiquiBase
     implementation("org.liquibase:liquibase-core:4.30.0")
-
-    // RabbitMQ
-    implementation("com.rabbitmq:amqp-client:5.21.0")
-    implementation("org.springframework.boot:spring-boot-starter-amqp")
-
-    // CloudEvent
-    implementation("io.cloudevents:cloudevents-core:4.0.1")
-    implementation("io.cloudevents:cloudevents-json-jackson:4.0.1")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")

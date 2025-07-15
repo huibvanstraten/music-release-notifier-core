@@ -48,6 +48,41 @@ services:
             - "5672:5672"
             - "15672:15672"
 
+    kafka:
+        image: bitnami/kafka:latest
+        container_name: kafka
+        ports:
+            - "9092:9092"   # client connections
+            - "9093:9093"   # internal controller
+        environment:
+            # ── REQUIRED FOR KRaft ────────────────────────────────────────
+            # unique broker+controller node ID
+            - KAFKA_CFG_NODE_ID=1
+            # which roles this process will play
+            - KAFKA_CFG_PROCESS_ROLES=broker,controller
+            # listener names → protocols
+            - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+            # how to bind the two listeners
+            - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+            # which listener is the controller quorum
+            - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+            # define the quorum voters (id@<host:port>)
+            - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+
+            # ── ALLOW PLAIN (non‐TLS) CLIENTS ───────────────────────────────
+            - ALLOW_PLAINTEXT_LISTENER=yes
+
+            # ── OPTIONAL OVERRIDES ──────────────────────────────────────────
+            # bitnami Kafka image also supports these, if you need them:
+            # - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+            # - KAFKA_CFG_NUM_PARTITIONS=3
+            # - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+
+        networks:
+            - local_network
+            - internal
+
+
     keycloak:
         container_name: music-release-notifier-keycloak
         image: quay.io/keycloak/keycloak:24.0

@@ -5,10 +5,10 @@ import com.hvs.kotlinspringplayground.artist.dto.ArtistDataDto
 import com.hvs.kotlinspringplayground.artist.dto.ArtistProfileDataDto
 import com.hvs.kotlinspringplayground.artist.repository.ArtistRepository
 import com.hvs.kotlinspringplayground.artist.service.ArtistService
-import com.hvs.kotlinspringplayground.outbox.service.OutboxService
 import com.hvs.kotlinspringplayground.spotify.service.SpotifyService
 import com.hvs.kotlinspringplayground.tidal.domain.Album
 import com.hvs.kotlinspringplayground.tidal.service.TidalService
+import com.hvs.outbox.application.usecase.OutboxService
 import org.springframework.transaction.annotation.Transactional
 
 open class ArtistService(
@@ -26,8 +26,8 @@ open class ArtistService(
         ): ArtistDataDto = spotifyService.getArtist(artistId)
 
     override fun getArtistProfileData(
-        artistName: String,
-        ): ArtistProfileDataDto? = spotifyService.getArtistProfileData(artistName)
+        artistId: String,
+        ): ArtistProfileDataDto? = spotifyService.getArtistProfileData(artistId)
 
 
     @Transactional

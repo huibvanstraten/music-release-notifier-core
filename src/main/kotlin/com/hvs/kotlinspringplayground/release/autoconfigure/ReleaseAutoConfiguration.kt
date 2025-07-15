@@ -1,10 +1,10 @@
 package com.hvs.kotlinspringplayground.release.autoconfigure
 
-import com.hvs.kotlinspringplayground.outbox.service.OutboxService
 import com.hvs.kotlinspringplayground.release.repository.ReleaseRepository
 import com.hvs.kotlinspringplayground.release.service.impl.ReleaseService
 import com.hvs.kotlinspringplayground.release.web.rest.ReleaseResource
 import com.hvs.kotlinspringplayground.spotify.service.SpotifyService
+import com.hvs.outbox.application.usecase.OutboxService
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

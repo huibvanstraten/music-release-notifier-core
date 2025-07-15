@@ -1,12 +1,12 @@
 package com.hvs.kotlinspringplayground.release.service
 
-import com.hvs.kotlinspringplayground.outbox.service.OutboxService
 import com.hvs.kotlinspringplayground.release.domain.jpa.Release
 import com.hvs.kotlinspringplayground.release.repository.ReleaseRepository
 import com.hvs.kotlinspringplayground.release.service.impl.ReleaseService
 import com.hvs.kotlinspringplayground.spotify.client.response.Album
 import com.hvs.kotlinspringplayground.spotify.client.response.ExternalUrls
 import com.hvs.kotlinspringplayground.spotify.service.SpotifyService
+import com.hvs.outbox.application.usecase.OutboxService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
