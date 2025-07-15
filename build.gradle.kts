@@ -70,6 +70,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework:spring-context")
 
+    // OpenAPI
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+
     // Security
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-oauth2-resource-server:6.4.2")

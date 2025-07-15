@@ -2,19 +2,11 @@ package com.hvs.kotlinspringplayground.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.annotation.Order
-import org.springframework.http.HttpMethod.GET
-import org.springframework.http.HttpMethod.POST
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher
-import org.springframework.util.AntPathMatcher
-
-
 
 // TODO: proper configurations for combination UI and for M2M. UI preferably based on roles
 @Configuration
@@ -40,21 +32,48 @@ class SecurityConfig {
 //        return http.build()
 //    }
 
+//    @Bean
+//    @Order(2)
+//    fun uiFilterChain(http: HttpSecurity): SecurityFilterChain {
+//        http
+//            .securityMatcher(AntPathRequestMatcher("/api/v1/**"))
+//            .cors(Customizer.withDefaults())
+//            .csrf { csrf -> csrf.ignoringRequestMatchers("/api/v1/**") }
+//            .authorizeHttpRequests { authorize ->
+////                authorize.requestMatchers(antMatcher(GET, "/api/v1/user/parameters")).hasAuthority("manage-account")
+//                authorize.anyRequest().authenticated()
+//            }
+//            .sessionManagement { sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+//            .oauth2ResourceServer { resourceServer ->
+//                resourceServer.jwt(Customizer.withDefaults())
+//                }
+//        return http.build()
+//    }
+
+
     @Bean
-    @Order(2)
-    fun uiFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .securityMatcher(AntPathRequestMatcher("/api/v1/**"))
+            .csrf { it.disable() }
             .cors(Customizer.withDefaults())
-            .csrf { csrf -> csrf.ignoringRequestMatchers("/api/v1/**") }
-            .authorizeHttpRequests { authorize ->
-//                authorize.requestMatchers(antMatcher(GET, "/api/v1/user/parameters")).hasAuthority("manage-account")
-                authorize.anyRequest().authenticated()
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .authorizeHttpRequests { auth ->
+                auth
+                    .requestMatchers(
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/swagger-resources/**",
+                        "/webjars/**"
+                    ).permitAll()
+                    .requestMatchers("/api/v1/**").authenticated()
             }
-            .sessionManagement { sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-            .oauth2ResourceServer { resourceServer ->
-                resourceServer.jwt(Customizer.withDefaults())
-                }
+
+            .oauth2ResourceServer { oauth2 ->
+                oauth2.jwt(Customizer.withDefaults())
+            }
+
         return http.build()
     }
 }
