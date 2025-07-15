@@ -19,9 +19,6 @@ spring:
         jwt:
           jwk-set-uri: ${KEYCLOAK:http://localhost:7080/realms/music-release-notifier/protocol/openid-connect/certs}
 
-
-
-
   rabbitmq:
     publisher-confirm-type: correlated
     publisher-returns: true
@@ -61,15 +58,3 @@ tidal:
 spotify:
   client-id: # env vars
   client-secret: # env vars
-
-outbox:
-  publisher:
-    cloudevent-source: "com.hvs.kotlinspringplayground"
-    polling-rate: PT10S
-  database: postgres
-
-rabbitmq:
-  exchange: ${RABBITMQ_EXCHANGE:music_monitor}
-  queue: ${RABBITMQ_QUEUE:release}
-  routing-key: ${RABBITMQ_ROUTING_KEY:release_routing_key}
-  delivery-timeout: 1

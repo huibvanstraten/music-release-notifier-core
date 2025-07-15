@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: outbox
+
+kafka:
+  enabled: true
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+  topic: ${KAFKA_TOPIC:outbox-events}
+  delivery-timeout: 10s
+
+outbox:
+  publisher:
+    cloudevent-source: "com.hvs.outbox"
+    polling-rate: PT10S
+  database: postgres
+
+rabbitmq:
+  exchange: ${RABBITMQ_EXCHANGE:music_monitor}
+  queue: ${RABBITMQ_QUEUE:release}
+  routing-key: ${RABBITMQ_ROUTING_KEY:release_routing_key}
+  delivery-timeout: 1
