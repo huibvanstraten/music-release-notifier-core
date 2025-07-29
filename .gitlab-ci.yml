@@ -74,6 +74,7 @@ update_helm_chart:
     - apt-get update -y && apt-get install -y openssh-client git
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_ed25519
+    - cat ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
     - sed -i 's/\r$//' ~/.ssh/id_ed25519
     - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
