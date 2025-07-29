@@ -1,4 +1,6 @@
 variables:
+  INFRA_REPO_HTTPS: "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/cohesion/cel-projects/music-release-notifier/music-release-notifier-k8s-cluster.git"
+
   # Docker‑in‑Docker config
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
@@ -66,27 +68,19 @@ build_and_publish:
     - docker tag "$IMAGE_NAME:$IMAGE_TAG" "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
     - docker push "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
 
-# 4) Update Helm chart in infra repo
 update_helm_chart:
   stage: update_helm_chart
   image: ubuntu:24.04
   before_script:
-    - apt-get update -y && apt-get install -y openssh-client git
-    - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_ed25519
-    - cat ~/.ssh/id_ed25519
-    - chmod 600 ~/.ssh/id_ed25519
-    - sed -i 's/\r$//' ~/.ssh/id_ed25519
-    - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-    - eval $(ssh-agent -s)
-    - ssh-add ~/.ssh/id_ed25519
+    - apt-get update -y && apt-get install -y git
     - git config --global user.email "$GITLAB_USER_EMAIL"
-    - git config --global user.name "$GITLAB_USER_NAME"
-    - git clone "$INFRA_REPO_SSH"
+    - git config --global user.name  "$GITLAB_USER_NAME"
+    # Clone via HTTPS using the job token
+    - git clone "$INFRA_REPO_HTTPS" music-release-notifier-k8s-cluster
     - cd music-release-notifier-k8s-cluster
+
   script:
-    - sed -i "s/music-release-notifier-core:.*/${IMAGE_NAME}:${IMAGE_TAG}/g" mrn/core/values.yaml
+    - sed -i "s|music-release-notifier-core:.*|${IMAGE_NAME}:${IMAGE_TAG}|g" mrn/core/values.yaml
     - git add mrn/core/values.yaml
-    - git commit -am "Update Image"
+    - git commit -m "bump image to ${IMAGE_NAME}:${IMAGE_TAG}"
     - git push
