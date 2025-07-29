@@ -90,5 +90,5 @@ update_helm_chart:
   script:
     - sed -i "s|music-release-notifier-core:.*|${IMAGE_NAME}:${IMAGE_TAG}|g" mrn/core/values.yaml
     - git add mrn/core/values.yaml
-    - git commit -m "chore: bump image to ${IMAGE_NAME}:${IMAGE_TAG}"
+    - git commit -m "bump image to ${IMAGE_NAME}:${IMAGE_TAG}"
     - git push
