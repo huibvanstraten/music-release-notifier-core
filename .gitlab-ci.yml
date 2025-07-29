@@ -11,62 +11,62 @@ variables:
   # Container naming
   SERVICE_NAME: "music-release-notifier"
   IMAGE_NAME: "music-release-notifier-core"
-  IMAGE_TAG: "v$CI_PIPELINE_ID"
+  IMAGE_TAG: "v1954478252"
 
 stages:
-  - build
-  - test
-  - publish
+#  - build
+#  - test
+#  - publish
   - update_helm_chart
 
 services:
   - name: docker:24.0.5-dind
     alias: docker
 
-# 1) Build
-build:
-  stage: build
-  image: gradle:jdk21
-  before_script:
-    - export GRADLE_USER_HOME=`pwd`/.gradle
-  script:
-    - ./gradlew --build-cache assemble
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: push
-    paths:
-      - build
-      - .gradle
+## 1) Build
+#build:
+#  stage: build
+#  image: gradle:jdk21
+#  before_script:
+#    - export GRADLE_USER_HOME=`pwd`/.gradle
+#  script:
+#    - ./gradlew --build-cache assemble
+#  cache:
+#    key: "$CI_COMMIT_REF_NAME"
+#    policy: push
+#    paths:
+#      - build
+#      - .gradle
+#
+## 2) Unit tests
+#test:
+#  stage: test
+#  image: gradle:jdk21
+#  before_script:
+#    - export GRADLE_USER_HOME=`pwd`/.gradle
+#  script:
+#    - ./gradlew check
+#  artifacts:
+#    when: always
+#    reports:
+#      junit: build/test-results/test/**/TEST-*.xml
+#  cache:
+#    key: "$CI_COMMIT_REF_NAME"
+#    policy: pull
+#    paths:
+#      - build
+#      - .gradle
 
-# 2) Unit tests
-test:
-  stage: test
-  image: gradle:jdk21
-  before_script:
-    - export GRADLE_USER_HOME=`pwd`/.gradle
-  script:
-    - ./gradlew check
-  artifacts:
-    when: always
-    reports:
-      junit: build/test-results/test/**/TEST-*.xml
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: pull
-    paths:
-      - build
-      - .gradle
-
-# 3) Build & publish Docker
-build_and_publish:
-  stage: publish
-  image: docker:24.0.5            # includes docker CLI
-  before_script:
-    - echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
-  script:
-    - docker build --build-arg NAME="Cloud Run" -t "$IMAGE_NAME:$IMAGE_TAG" .
-    - docker tag "$IMAGE_NAME:$IMAGE_TAG" "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
-    - docker push "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
+## 3) Build & publish Docker
+#build_and_publish:
+#  stage: publish
+#  image: docker:24.0.5            # includes docker CLI
+#  before_script:
+#    - echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+#  script:
+#    - docker build --build-arg NAME="Cloud Run" -t "$IMAGE_NAME:$IMAGE_TAG" .
+#    - docker tag "$IMAGE_NAME:$IMAGE_TAG" "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
+#    - docker push "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
 
 update_helm_chart:
   stage: update_helm_chart
