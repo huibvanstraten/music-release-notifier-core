@@ -1,11 +1,5 @@
-image: google/cloud-sdk:slim
-
-services:
-  - name: docker:24.0.5-dind
-    alias: docker
-
 variables:
-  # Docker-in-Docker config
+  # Docker‑in‑Docker config
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
 
@@ -23,7 +17,11 @@ stages:
   - publish
   - update_helm_chart
 
-#gradle build
+services:
+  - name: docker:24.0.5-dind
+    alias: docker
+
+# 1) Build
 build:
   stage: build
   image: gradle:jdk21
@@ -38,7 +36,7 @@ build:
       - build
       - .gradle
 
-# Unit tests
+# 2) Unit tests
 test:
   stage: test
   image: gradle:jdk21
@@ -57,43 +55,35 @@ test:
       - build
       - .gradle
 
-# build and publish
+# 3) Build & publish Docker
 build_and_publish:
   stage: publish
+  image: docker:24.0.5            # includes docker CLI
   before_script:
-    # — Docker Hub login
     - echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
-
   script:
-    # 1) build once (add any --build-arg you need)
     - docker build --build-arg NAME="Cloud Run" -t "$IMAGE_NAME:$IMAGE_TAG" .
+    - docker tag "$IMAGE_NAME:$IMAGE_TAG" "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
+    - docker push "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
 
-    # 2) tag and push Docker
-    - docker tag $IMAGE_NAME:$IMAGE_TAG $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
-    - docker push $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
-
+# 4) Update Helm chart in infra repo
 update_helm_chart:
   stage: update_helm_chart
   image: ubuntu:24.04
   before_script:
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
-    - mkdir -p /root/.ssh
-    - echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_ed25519
-    - chmod 600 /root/.ssh/id_ed25519
+    - apt-get update -y && apt-get install -y openssh-client git
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
     - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    # run ssh-agent
     - eval $(ssh-agent -s)
-    # add ssh key stored in SSH_PRIVATE_KEY variable to the agent store
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    # Git
-    - git config --global user.email $GITLAB_USER_EMAIL
-    - git config --global user.name $GITLAB_USER_NAME
-    - git clone $INFRA_REPO_SSH
+    - git config --global user.email "$GITLAB_USER_EMAIL"
+    - git config --global user.name "$GITLAB_USER_NAME"
+    - git clone "$INFRA_REPO_SSH"
     - cd music-release-notifier-k8s-cluster
-    - ls -latr
   script:
-    # Update Image TAG
     - sed -i "s/music-release-notifier-core:.*/${IMAGE_NAME}:${IMAGE_TAG}/g" mrn/core/values.yaml
     - git add mrn/core/values.yaml
     - git commit -am "Update Image"
