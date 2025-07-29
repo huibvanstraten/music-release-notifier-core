@@ -71,16 +71,24 @@ services:
 update_helm_chart:
   stage: update_helm_chart
   image: ubuntu:24.04
+
+  variables:
+    INFRA_REPO_HTTPS: "https://$INFRA_DEPLOY_USER:$INFRA_DEPLOY_TOKEN@gitlab.com/cohesion/cel-projects/music-release-notifier/music-release-notifier-k8s-cluster.git"
+
   before_script:
+    # install git
     - apt-get update -y && apt-get install -y git
+
+    # configure your identity
     - git config --global user.email "$GITLAB_USER_EMAIL"
     - git config --global user.name  "$GITLAB_USER_NAME"
-    # Clone via HTTPS using the job token
+
+    # clone via the deploy-token credentials
     - git clone "$INFRA_REPO_HTTPS" music-release-notifier-k8s-cluster
     - cd music-release-notifier-k8s-cluster
 
   script:
     - sed -i "s|music-release-notifier-core:.*|${IMAGE_NAME}:${IMAGE_TAG}|g" mrn/core/values.yaml
     - git add mrn/core/values.yaml
-    - git commit -m "bump image to ${IMAGE_NAME}:${IMAGE_TAG}"
+    - git commit -m "chore: bump image to ${IMAGE_NAME}:${IMAGE_TAG}"
     - git push
