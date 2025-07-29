@@ -21,6 +21,7 @@ stages:
   - build
   - test
   - publish
+  - update_helm_chart
 
 #gradle build
 build:
@@ -70,3 +71,30 @@ build_and_publish:
     # 2) tag and push Docker
     - docker tag $IMAGE_NAME:$IMAGE_TAG $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
     - docker push $DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG
+
+update_helm_chart:
+  stage: update_helm_chart
+  image: ubuntu:24.04
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
+    - mkdir -p /root/.ssh
+    - echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_ed25519
+    - chmod 600 /root/.ssh/id_ed25519
+    - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    # run ssh-agent
+    - eval $(ssh-agent -s)
+    # add ssh key stored in SSH_PRIVATE_KEY variable to the agent store
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    # Git
+    - git config --global user.email $GITLAB_USER_EMAIL
+    - git config --global user.name $GITLAB_USER_NAME
+    - git clone $INFRA_REPO_SSH
+    - cd music-release-notifier-k8s-cluster
+    - ls -latr
+  script:
+    # Update Image TAG
+    - sed -i "s/music-release-notifier-core:.*/${IMAGE_NAME}:${IMAGE_TAG}/g" mrn/core/values.yaml
+    - git add mrn/core/values.yaml
+    - git commit -am "Update Image"
+    - git push

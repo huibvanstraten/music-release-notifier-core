@@ -18,10 +18,9 @@ class KafkaMessagePublisher(
     private val logger = KotlinLogging.logger {}
 
     override fun publish(message: OutboxMessage) {
-        logger.trace {
-            "Sending OutboxMessage to Kafka topic=$topic, msgId=${message.id}"
-        }
+        logger.trace { "Sending OutboxMessage to Kafka topic=$topic, msgId=${message.id}" }
 
+        // Sync
         val future = kafkaTemplate.send(topic, message.id.toString(), message.message)
 
         try {

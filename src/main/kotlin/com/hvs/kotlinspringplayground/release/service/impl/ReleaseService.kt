@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.hvs.kotlinspringplayground.artist.event.ReleaseEvent
+import com.hvs.outbox.core.domain.event.ReleaseEvent
 import com.hvs.kotlinspringplayground.release.domain.jpa.Release
 import com.hvs.kotlinspringplayground.release.dto.ReleaseDto
 import com.hvs.kotlinspringplayground.release.repository.ReleaseRepository

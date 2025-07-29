@@ -4,9 +4,8 @@ spring:
 
 kafka:
   enabled: true
-  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
-  topic: ${KAFKA_TOPIC:outbox-events}
-  delivery-timeout: 10s
+  topic: ${KAFKA_TOPIC:music_monitor}
+  delivery-timeout: 30000
 
 outbox:
   publisher:
@@ -19,3 +18,4 @@ rabbitmq:
   queue: ${RABBITMQ_QUEUE:release}
   routing-key: ${RABBITMQ_ROUTING_KEY:release_routing_key}
   delivery-timeout: 1
+  enabled: false

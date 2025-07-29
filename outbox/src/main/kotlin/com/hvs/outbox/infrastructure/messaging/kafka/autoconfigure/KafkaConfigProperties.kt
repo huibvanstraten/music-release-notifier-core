@@ -5,7 +5,6 @@ import java.time.Duration
 
 @ConfigurationProperties(prefix = "kafka")
 data class KafkaConfigProperties(
-    val bootstrapServers: List<String>,
     val topic: String,
     val deliveryTimeout: Duration,
     val enabled: Boolean
