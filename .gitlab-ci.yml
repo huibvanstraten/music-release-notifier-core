@@ -1,5 +1,4 @@
 variables:
-  INFRA_REPO_HTTPS: "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/cohesion/cel-projects/music-release-notifier/music-release-notifier-k8s-cluster.git"
 
   # Docker‑in‑Docker config
   DOCKER_HOST: tcp://docker:2375
@@ -14,81 +13,55 @@ variables:
   IMAGE_TAG: "v1954478252"
 
 stages:
-#  - build
-#  - test
-#  - publish
-  - update_helm_chart
+  - build
+  - test
+  - publish
 
 services:
   - name: docker:24.0.5-dind
     alias: docker
 
-## 1) Build
-#build:
-#  stage: build
-#  image: gradle:jdk21
-#  before_script:
-#    - export GRADLE_USER_HOME=`pwd`/.gradle
-#  script:
-#    - ./gradlew --build-cache assemble
-#  cache:
-#    key: "$CI_COMMIT_REF_NAME"
-#    policy: push
-#    paths:
-#      - build
-#      - .gradle
-#
-## 2) Unit tests
-#test:
-#  stage: test
-#  image: gradle:jdk21
-#  before_script:
-#    - export GRADLE_USER_HOME=`pwd`/.gradle
-#  script:
-#    - ./gradlew check
-#  artifacts:
-#    when: always
-#    reports:
-#      junit: build/test-results/test/**/TEST-*.xml
-#  cache:
-#    key: "$CI_COMMIT_REF_NAME"
-#    policy: pull
-#    paths:
-#      - build
-#      - .gradle
-
-## 3) Build & publish Docker
-#build_and_publish:
-#  stage: publish
-#  image: docker:24.0.5            # includes docker CLI
-#  before_script:
-#    - echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
-#  script:
-#    - docker build --build-arg NAME="Cloud Run" -t "$IMAGE_NAME:$IMAGE_TAG" .
-#    - docker tag "$IMAGE_NAME:$IMAGE_TAG" "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
-#    - docker push "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
-
-update_helm_chart:
-  stage: update_helm_chart
-  image: ubuntu:24.04
-
-  variables:
-    INFRA_REPO_HTTPS: "https://$INFRA_DEPLOY_USER:$INFRA_DEPLOY_TOKEN@gitlab.com/cohesion/cel-projects/music-release-notifier/music-release-notifier-k8s-cluster.git"
-
+# 1) Build
+build:
+  stage: build
+  image: gradle:jdk21
   before_script:
-    # install git
-    - apt-get update -y && apt-get install -y git
-
-    # configure your identity
-    - git config --global user.email "$GITLAB_USER_EMAIL"
-    - git config --global user.name  "$GITLAB_USER_NAME"
-
-    # clone via the deploy-token credentials
-    - git clone "$INFRA_REPO_HTTPS" music-release-notifier-k8s-cluster
-    - cd music-release-notifier-k8s-cluster
-
+    - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
-    - sed -i "s|music-release-notifier-core:.*|${IMAGE_NAME}:${IMAGE_TAG}|g" mrn/core/values.yaml
-    - git add mrn/core/values.yaml
-    - git commit -m "bump image to ${IMAGE_NAME}:${IMAGE_TAG}"
-    - git push
+    - ./gradlew --build-cache assemble
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
+
+# 2) Unit tests
+test:
+  stage: test
+  image: gradle:jdk21
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+  script:
+    - ./gradlew check
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
+
+# 3) Build & publish Docker
+build_and_publish:
+  stage: publish
+  image: docker:24.0.5            # includes docker CLI
+  before_script:
+    - echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+  script:
+    - docker build --build-arg NAME="Cloud Run" -t "$IMAGE_NAME:$IMAGE_TAG" .
+    - docker tag "$IMAGE_NAME:$IMAGE_TAG" "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
+    - docker push "$DOCKER_HUB_USER/$IMAGE_NAME:$IMAGE_TAG"
