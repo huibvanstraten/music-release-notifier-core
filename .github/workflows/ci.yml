@@ -12,7 +12,7 @@ on:
 
 env:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-  SERVICE_NAME: music-release-notifier
+  IMAGE_NAME: music-release-notifier
   IMAGE_TAG: v1954478252
 
 jobs:
